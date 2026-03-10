@@ -7,16 +7,16 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
     <style>
         /* =========================================
-           🌑 1. พื้นหลัง Cinematic & Film Grain 🌑 
+           🌑 1. พื้นหลัง Cinematic & Noise 🌑 
            ========================================= */
         body { 
             margin: 0; 
-            background-color: #050505; 
-            background-image: radial-gradient(circle at 50% 50%, #1c1c1c 0%, #050505 80%);
+            background-color: #010101; /* ดำสนิท */
             color: #fff; 
             font-family: 'Segoe UI', sans-serif; 
             overflow: hidden; 
         }
+        /* เพิ่ม Noise จางๆ ให้ดูเป็นงานภาพยนตร์ */
         body::before {
             content: ""; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
@@ -26,9 +26,9 @@
         .container { position: relative; width: 100vw; height: 100vh; touch-action: pan-y; z-index: 1; }
 
         /* =========================================
-           🎛️ 2. Navbar & ปุ่มเมนู Camera Control 🎛️
+           🎛️ 2. Navbar & ปุ่มเมนูแคปซูล 🎛️
            ========================================= */
-        .navbar { position: fixed; top: 0; width: 100%; padding: 30px 50px; display: flex; justify-content: space-between; align-items: center; box-sizing: border-box; z-index: 100; mix-blend-mode: difference; }
+        .navbar { position: fixed; top: 0; width: 100%; padding: 20px 40px; display: flex; justify-content: space-between; align-items: center; box-sizing: border-box; z-index: 100; mix-blend-mode: difference; }
         .logo { font-size: 1.2rem; font-weight: bold; letter-spacing: 2px; text-transform: uppercase; }
         
         .camera-pill-btn {
@@ -42,8 +42,8 @@
             width: 20px; height: 20px; border-radius: 10px; background: white;
             transition: 0.4s cubic-bezier(0.25, 1, 0.5, 1); box-shadow: 0 0 10px rgba(255,255,255,0.5);
         }
-        .camera-pill-btn.active { background: rgba(255, 255, 255, 0.2); border-color: #ff416c; }
-        .camera-pill-btn.active .indicator { transform: translateX(34px); background: #ff416c; box-shadow: 0 0 15px #ff416c; width: 22px; }
+        .camera-pill-btn.active { background: rgba(255, 255, 255, 0.2); border-color: #ffcc00; }
+        .camera-pill-btn.active .indicator { transform: translateX(34px); background: #ffcc00; box-shadow: 0 0 15px #ffcc00; width: 22px; }
 
         .nav-menu { position: fixed; top: 0; left: 0; width: 100%; height: 100vh; background: rgba(0,0,0,0.95); z-index: 90; display: flex; justify-content: center; align-items: center; opacity: 0; pointer-events: none; transition: 0.4s ease-in-out; }
         .nav-menu.active { opacity: 1; pointer-events: all; }
@@ -53,36 +53,89 @@
         .menu-home { color: #888 !important; font-size: 1.2rem !important; margin-bottom: 40px !important; }
 
         /* =========================================
-           📸 3. ระบบหน้าจอ Camera UI (สเกลและตัวเลข) 📸
+           ✨ 3. สไตล์ปุ่มลิดควิดกาส (Liquid Glass) ✨
+           ========================================= */
+        .open-folder, #back-btn {
+            background: rgba(255, 255, 255, 0.1) !important;
+            color: #fff !important;
+            border: 1px solid rgba(255, 255, 255, 0.25) !important;
+            border-radius: 50px !important;
+            backdrop-filter: blur(15px) !important;
+            -webkit-backdrop-filter: blur(15px) !important;
+            font-weight: bold !important;
+            cursor: pointer !important;
+            transition: 0.3s !important;
+            position: relative !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            /* เอฟเฟกต์เงานูนๆ มันๆ */
+            box-shadow: inset 0 -4px 6px rgba(0,0,0,0.3), inset 0 2px 5px rgba(255,255,255,0.2) !important;
+        }
+        /* เอฟเฟกต์ตอนเอามือ/เมาส์ไปชี้ */
+        .open-folder:hover, #back-btn:hover {
+            background: rgba(255, 255, 255, 0.2) !important;
+            box-shadow: inset 0 -2px 6px rgba(0,0,0,0.3), inset 0 4px 10px rgba(255,255,255,0.4), 0 0 20px rgba(255,255,255,0.1) !important;
+            transform: scale(1.03) !important;
+        }
+        /* แสงไฮไลท์ด้านบนสุดให้ดูเป็นแก้วมันวาว */
+        .open-folder::before, #back-btn::before {
+            content: ""; position: absolute; top: 1px; left: 50%; transform: translateX(-50%);
+            width: 80%; height: 35%; background: linear-gradient(to bottom, rgba(255,255,255,0.25), transparent);
+            border-radius: 50px;
+        }
+
+        /* ปุ่ม "ดูผลงาน" ในหน้าหลัก */
+        .home-slide .open-folder {
+            padding: 12px 24px; width: 100%; font-size: 1.1rem; box-sizing: border-box;
+        }
+
+        /* 🔴 แก้ไข "Back to Folder" เป็น "Back to Home" (ตรงกลางบน) 🔴 */
+        #back-btn {
+            position: fixed; top: 20px; left: 50%; transform: translateX(-50%);
+            z-index: 110; padding: 10px 25px; font-size: 0.9rem; letter-spacing: 1px;
+            text-transform: uppercase; display: none; /* ซ่อนไว้ก่อน */
+        }
+
+        /* =========================================
+           📸 4. โค้งครึ่งวงกลม Camera UI 📸 
            ========================================= */
         #camera-ui {
-            position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%);
-            z-index: 100; display: flex; flex-direction: column; align-items: center; pointer-events: none;
+            position: fixed; bottom: -100px; /* ย้ายวงแหวนลงมาครึ่งนึง */
+            left: 50%; transform: translateX(-50%);
+            width: 350px; height: 350px; /* เพิ่มขนาดวงกลม */
+            z-index: 100; display: flex; flex-direction: column; align-items: center;
+            pointer-events: none;
         }
-        /* แถบไม้บรรทัดสเกลเลนส์ */
-        .scale-window {
-            width: 250px; height: 30px; position: relative; overflow: hidden;
-            -webkit-mask-image: linear-gradient(90deg, transparent, black 40%, black 60%, transparent);
+        /* แถบสเกลบรรทัด (ขีดๆ รอบวงกลม) */
+        .dial-window {
+            width: 100%; height: 100%; position: relative; border-radius: 50%;
+            border: 2px solid rgba(255,255,255,0.05);
+            /* มาส์กให้เห็นแค่โค้งบน */
+            -webkit-mask-image: linear-gradient(to bottom, black 15%, transparent 40%);
         }
-        .scale-track {
-            position: absolute; left: 50%; top: 0; height: 100%; display: flex; align-items: flex-end;
+        .dial-track {
+            position: absolute; left: 0; top: 0; width: 100%; height: 100%;
             transition: transform 0.3s cubic-bezier(0.25, 1, 0.5, 1);
         }
-        .scale-tick {
-            width: 2px; height: 12px; background: rgba(255,255,255,0.4); margin: 0 8px; border-radius: 1px;
-            flex-shrink: 0;
+        /* ขีดสเกล */
+        .dial-tick {
+            position: absolute; top: 0; left: 50%;
+            width: 2px; height: 12px; background: rgba(255,255,255,0.3);
+            border-radius: 1px; transform-origin: 50% 175px; /* จุดหมุนอยู่ตรงกลางวงกลม */
         }
-        .scale-tick.major { height: 20px; background: rgba(255,255,255,0.8); }
+        .dial-tick.major { height: 20px; background: rgba(255,255,255,0.7); width: 3px; }
         
-        /* ขีดสีเหลืองบอกตำแหน่งตรงกลาง */
+        /* ขีดสีเหลืองบอกตำแหน่งตรงกลางเลนส์ */
         .center-mark {
-            position: absolute; bottom: 0; left: 50%; transform: translateX(-50%);
-            width: 3px; height: 26px; background: #ffcc00; border-radius: 2px; box-shadow: 0 0 10px #ffcc00;
+            position: absolute; top: -10px; left: 50%; transform: translateX(-50%);
+            width: 4px; height: 30px; background: #ffcc00; border-radius: 2px;
+            box-shadow: 0 0 15px #ffcc00; z-index: 101;
         }
-        /* ตัวเลข 1 / 5 */
+        /* ตัวเลข 1 / 8 (สีเหลืองแบบใน iPhone) */
         .camera-number {
-            color: #ffcc00; font-size: 1.2rem; font-weight: bold; margin-top: 8px;
-            letter-spacing: 2px; text-shadow: 0 2px 10px rgba(0,0,0,0.8);
+            position: absolute; top: 40px; color: #ffcc00; font-size: 1.3rem;
+            font-weight: bold; letter-spacing: 2px; text-shadow: 0 2px 10px rgba(0,0,0,0.8);
         }
 
         /* เมาส์วงกลม */
@@ -95,7 +148,7 @@
         /* =========================================
            หน้าหลัก (Home View)
            ========================================= */
-        #home-view { display: flex; align-items: center; justify-content: center; }
+        #home-view { display: flex; align-items: center; justify-content: center; z-index: 2; }
         .homeSwiper { width: 100%; padding-top: 50px; padding-bottom: 50px; }
         .home-slide {
             width: 350px; height: 550px; background-position: center; background-size: cover;
@@ -106,42 +159,32 @@
         .home-slide .content { position: relative; z-index: 2; padding: 30px; width: 100%; box-sizing: border-box; text-align: center; }
         .home-slide .name { font-size: 2.5rem; font-weight: bold; margin-bottom: 10px; text-transform: uppercase; text-shadow: 0 2px 10px rgba(0,0,0,0.5); }
         .home-slide .des { font-size: 1rem; color: #ccc; margin-bottom: 25px; line-height: 1.5; }
-        .home-slide .open-folder { padding: 12px 24px; background: #fff; color: #000; border: none; border-radius: 30px; font-weight: bold; cursor: pointer; transition: 0.3s; width: 100%; font-size: 1.1rem; }
-        .home-slide .open-folder:hover { background: #ffcc00; color: black; transform: scale(1.05); }
 
         /* =========================================
            หน้าจอรายละเอียดผลงาน
            ========================================= */
         #detail-view { position: absolute; top: 0; left: 0; width: 100%; height: 100vh; z-index: 50; padding-top: 100px; overflow-y: auto; box-sizing: border-box; }
-        .detail-header { padding: 0 50px; margin-bottom: 40px; max-width: 1500px; margin-left: auto; margin-right: auto; }
-        #back-btn { background: none; border: none; color: #888; font-size: 1rem; cursor: pointer; padding: 0; margin-bottom: 20px; transition: color 0.3s; }
-        #back-btn:hover { color: #fff; }
-        #detail-title { font-size: 4rem; margin: 0; text-transform: uppercase; }
+        .detail-header { padding: 0 50px; margin-bottom: 20px; max-width: 1500px; margin-left: auto; margin-right: auto; text-align: center; }
+        #detail-title { font-size: 3.5rem; margin: 0; text-transform: uppercase; color: #ffcc00; text-shadow: 0 0 15px rgba(255, 204, 0, 0.3); }
 
         .profile-container { display: flex; gap: 50px; padding: 0 50px 100px 50px; flex-wrap: wrap; max-width: 1500px; margin: 0 auto; }
         .profile-image-box { flex: 1; min-width: 300px; max-width: 450px; }
         .profile-image-box img { width: 100%; border-radius: 20px; box-shadow: 0 10px 30px rgba(255,255,255,0.05); object-fit: cover; }
         .profile-info-box { flex: 2; min-width: 300px; }
-        .profile-info-box h2 { font-size: 2rem; border-bottom: 1px solid #333; padding-bottom: 10px; margin-top: 0; }
+        .profile-info-box h2 { font-size: 2rem; border-bottom: 1px solid #333; padding-bottom: 10px; margin-top: 0; color: #ffcc00; }
         .profile-info-box h3 { color: #888; font-size: 1.2rem; margin-top: 30px; margin-bottom: 15px; }
         .profile-info-box p { font-size: 1.1rem; line-height: 1.8; color: #ccc; margin: 8px 0; }
-        .profile-info-box strong { color: #fff; }
-        .skill-group { margin-bottom: 20px; }
-        .skill-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; font-weight: bold; }
-        .skill-logo { width: 24px; height: 24px; object-fit: contain; border-radius: 4px; margin-right: 10px;}
         .progress-bar-bg { width: 100%; height: 10px; background-color: rgba(255,255,255,0.1); border-radius: 10px; overflow: hidden; }
-        .progress-fill { height: 100%; background: linear-gradient(90deg, #ffcc00, #ff9900); border-radius: 10px; transition: width 1.5s ease-in-out; }
         .contact-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; }
-        .contact-item { background: rgba(255,255,255,0.05); padding: 15px 20px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.1); backdrop-filter: blur(5px); }
+        .contact-item { background: rgba(255,255,255,0.03); padding: 15px 20px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.1); backdrop-filter: blur(5px); }
 
         /* วงล้อผลงานด้านใน */
         .project-group { padding: 0 !important; display: none; }
         .project-group[style*="display: block"] { display: block !important; }
         .project-group .swiper { width: 100%; padding-top: 20px; padding-bottom: 100px; }
-        
         .project-group .swiper-slide { width: auto !important; height: 60vh; display: flex; justify-content: center; align-items: center; transition: 0.3s; }
         
-        /* 🔴 แก้ไขกรอบล่องหน: ให้ตัวกล่องโปร่งใส 100% ไม่ใส่ Box Shadow ที่กล่อง 🔴 */
+        /* 🔴 แก้ไขกรอบล่องหน: ใสเคลียร์ 100% 🔴 */
         .grid-item { position: relative; width: auto; height: 100%; background: transparent !important; border-radius: 15px; overflow: hidden; cursor: none; box-shadow: none !important; }
         /* ย้าย Box shadow มาใส่ที่รูปภาพและวิดีโอแทน */
         .grid-item img, .grid-item video { width: auto; height: 100%; display: block; object-fit: cover; transition: transform 0.8s ease; box-shadow: 0 15px 40px rgba(0,0,0,0.8); border-radius: 15px; }
@@ -160,15 +203,15 @@
         }
 
         @media (max-width: 768px) {
-            .navbar { padding: 20px 25px; }
-            #camera-ui { bottom: 20px; }
-            .scale-window { width: 180px; }
+            .navbar { padding: 15px 20px; }
+            #camera-ui { bottom: -70px; width: 250px; height: 250px; } /* ย่อวงโค้งในมือถือ */
+            .dial-tick { transform-origin: 50% 125px; } /* ปรับจุดหมุนให้เข้ากับขนาดใหม่ */
+            .camera-number { font-size: 1.1rem; top: 30px; }
             
             .home-slide { width: 80vw; height: 55vh; }
             .home-slide .name { font-size: 2rem; }
-            .detail-header { padding: 0 20px; }
             #detail-title { font-size: 2.5rem; }
-            .profile-container { padding: 0 20px 100px 20px; }
+            .profile-container { padding: 0 20px 100px 20px; gap: 30px; }
             
             /* 🔴 เคลียร์กรอบล่องหนมือถือ: ปล่อยสัดส่วนยืดหยุ่น ห้ามใส่พื้นหลังเด็ดขาด 🔴 */
             .project-group .swiper-slide { width: 85vw !important; height: auto !important; }
@@ -180,6 +223,8 @@
     </style>
 </head>
 <body>
+
+    <button id="back-btn">Back to Home</button>
 
     <nav class="navbar">
         <div class="logo">PORTFOLIO</div>
@@ -201,12 +246,12 @@
     </div>
 
     <div id="camera-ui">
-        <div class="scale-window">
-            <div class="scale-track" id="scale-track">
-                </div>
-            <div class="center-mark"></div>
-        </div>
+        <div class="center-mark"></div>
         <div class="camera-number" id="camera-number">1 / 6</div>
+        <div class="dial-window">
+            <div class="dial-track" id="dial-track">
+                </div>
+        </div>
     </div>
 
     <div class="cursor" id="custom-cursor"></div>
@@ -238,7 +283,6 @@
 
     <div id="detail-view" style="display: none;">
         <div class="detail-header fade-in">
-            <button id="back-btn">← BACK TO FOLDERS</button>
             <h1 id="detail-title">PROJECTS</h1>
         </div>
         
@@ -341,39 +385,39 @@
             <div class="grid-item"><video autoplay loop muted playsinline><source src="Liliana-Witching-Hour.mp4" type="video/mp4"></video></div>
             <div class="grid-item"><video autoplay loop muted playsinline><source src="Murad-Moon-Chuser.mp4" type="video/mp4"></video></div>
             <div class="grid-item"><video autoplay loop muted playsinline><source src="Nakroth-Stellar-Troupe.mp4" type="video/mp4"></video></div>
-            <div class="grid-item"><video autoplay loop muted playsinline><source src="Natalya-Kuromi-Heart.mp4" type="video/mp4"></video></div>
         </div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
 
     <script>
-        // --- 1. สร้างขีดสเกลให้ Camera Control ---
-        const scaleTrack = document.getElementById('scale-track');
-        // สร้างขีดทั้งหมด 50 ขีดเผื่อไว้สำหรับแฟ้มที่มีผลงานเยอะๆ
-        for(let i=0; i<50; i++) {
+        // --- 1. สร้างขีดสเกลสำหรับ Camera Dial (ครึ่งวงกลม) ---
+        const dialTrack = document.getElementById('dial-track');
+        for(let i=-20; i<=20; i++) { // สร้างขีด 40 ขีด กระจายมุม
             let tick = document.createElement('div');
-            tick.className = (i % 5 === 0) ? 'scale-tick major' : 'scale-tick';
-            scaleTrack.appendChild(tick);
+            // ขีดหลักทุกๆ 5 ขีด
+            tick.className = (i % 5 === 0) ? 'dial-tick major' : 'dial-tick';
+            // หมุนขีดให้ออกเป็นแนวรัศมี (ทีละ 3 องศา)
+            tick.style.transform = `translateX(-50%) rotate(${i * 3}deg)`;
+            dialTrack.appendChild(tick);
         }
 
-        // --- 2. ฟังก์ชันอัปเดตตัวเลขและเลื่อนสเกลกล้อง ---
+        // --- 2. ฟังก์ชันอัปเดต UI กล้อง (ตัวเลขแม่นยำ + หมุนวงล้อ) ---
         const cameraNumber = document.getElementById('camera-number');
-        // ระยะห่างของขีดสเกล (ความกว้าง 2px + margin 8px + 8px = 18px ต่อการเลื่อน 1 ครั้ง)
-        const tickStep = 18; 
         
         function updateCameraUI(swiper) {
-            const total = swiper.slides.length;
+            // ❌ แก้ปัญหานับเกิน: เอาจำนวน slides จริงที่ Swiper รู้จัก ❌
+            const total = swiper.slides.length; 
             const current = swiper.activeIndex + 1;
-            // อัปเดตตัวเลข เช่น 1 / 5
+            
+            // อัปเดตตัวเลข 1 / 8 (สีเหลือง)
             cameraNumber.innerText = `${current} / ${total}`;
-            // เลื่อนแถบสเกลไปทางซ้ายตามจำนวนภาพ
-            scaleTrack.style.transform = `translateX(${-swiper.activeIndex * tickStep}px)`;
+            
+            // หมุนวงล้อตามการสไลด์ (หมุนทีละ 6 องศา)
+            dialTrack.style.transform = `rotate(${-swiper.activeIndex * 6}deg)`;
         }
 
         // --- 3. ระบบ 3D Coverflow หน้าหลัก ---
-        let currentActiveSwiper = null; // ตัวแปรจำว่าตอนนี้ดู Swiper ตัวไหนอยู่
-
         const homeSwiper = new Swiper(".homeSwiper", {
             effect: "coverflow",
             grabCursor: true,
@@ -383,12 +427,12 @@
             coverflowEffect: { rotate: 20, stretch: 0, depth: 250, modifier: 1, slideShadows: true },
             keyboard: { enabled: true },
             mousewheel: true,
+            // ผูกระบบ UI กล้องกับ Swiper หน้าหลัก
             on: {
                 init: function() { updateCameraUI(this); },
                 slideChange: function () { updateCameraUI(this); }
             }
         });
-        currentActiveSwiper = homeSwiper; // ตั้งค่าเริ่มต้นให้ชี้ไปที่หน้าหลัก
 
         // --- 4. ระบบเมนูแคปซูล ---
         const hamburgerBtn = document.getElementById('hamburger-btn');
@@ -407,14 +451,12 @@
         const customCursor = document.getElementById('custom-cursor');
         const cameraUI = document.getElementById('camera-ui');
 
-        let innerSwipers = {}; // เก็บ swiper แต่ละหน้าไว้
-
         function initInnerSwiper(groupId) {
             const group = document.getElementById(groupId);
+            // ถ้าเคยสร้าง Swiper ในหน้านี้แล้ว ให้สั่งอัปเดต UI กล้องตาม Swiper เดิมเลย
             if (group.querySelector('.swiper')) {
-                // ถ้ามีวงล้ออยู่แล้ว ให้อัปเดตสเกลกล้องตามวงล้อนี้เลย
-                currentActiveSwiper = innerSwipers[groupId];
-                updateCameraUI(currentActiveSwiper);
+                const existingSwiper = group.querySelector('.swiper').swiper;
+                updateCameraUI(existingSwiper);
                 return;
             }
 
@@ -433,7 +475,8 @@
             swiperContainer.appendChild(swiperWrapper);
             group.appendChild(swiperContainer);
 
-            const newSwiper = new Swiper(`.myInnerSwiper-${groupId}`, {
+            // สร้าง Swiper ใหม่สำหรับแฟ้มนี้
+            new Swiper(`.myInnerSwiper-${groupId}`, {
                 effect: "coverflow",
                 grabCursor: true,
                 centeredSlides: true,
@@ -443,15 +486,15 @@
                 mousewheel: true,
                 observer: true, 
                 observeParents: true,
+                // ผูกระบบ UI กล้องกับ Swiper แฟ้มย่อยนี้
                 on: {
                     init: function() { updateCameraUI(this); },
                     slideChange: function () { updateCameraUI(this); }
                 }
             });
-            innerSwipers[groupId] = newSwiper;
-            currentActiveSwiper = newSwiper;
         }
 
+        // เมื่อกด "ดูผลงาน" หรือลิงก์เมนู
         document.querySelectorAll('.open-folder, .menu-link').forEach(button => {
             button.addEventListener('click', function() {
                 if (navMenu.classList.contains('active')) toggleMenu();
@@ -471,8 +514,10 @@
                 
                 homeView.style.display = 'none';
                 detailView.style.display = 'block';
+                // โชว์ปุ่ม Back to Home สีขาวมันวาวตรงกลางบน
+                backBtn.style.display = 'flex';
                 
-                // ซ่อนระบบกล้องถ้าเข้าไปดูหน้า Profile (เพราะไม่มีวงล้อ)
+                // ซ่อน UI กล้องถ้าเข้าไปดูหน้า Profile (เพราะไม่มีวงล้อ)
                 if(targetId === 'profile-section') {
                     cameraUI.style.display = 'none';
                 } else {
@@ -481,6 +526,7 @@
 
                 if(displayType === 'block' && targetId !== 'profile-section') {
                     customCursor.style.display = 'block';
+                    // เริ่มระบบวงล้อผลงานด้านใน
                     initInnerSwiper(targetId);
                 } else {
                     customCursor.style.display = 'none';
@@ -488,27 +534,21 @@
             });
         });
 
-        document.getElementById('menu-home-btn').addEventListener('click', function() {
+        // เมื่อกดกลับหน้าหลัก (ปุ่ม Back to Home)
+        function goToHome() {
             if (navMenu.classList.contains('active')) toggleMenu();
             homeView.style.display = 'flex';
             detailView.style.display = 'none';
+            backBtn.style.display = 'none'; // ซ่อนปุ่ม Back
             customCursor.style.display = 'none';
-            cameraUI.style.display = 'flex';
+            cameraUI.style.display = 'flex'; // โชว์ UI กล้องหน้าหลัก
             
             // กลับมาหน้าหลัก ให้อัปเดต UI กล้องเป็นของหน้าหลัก
-            currentActiveSwiper = homeSwiper;
             updateCameraUI(homeSwiper);
-        });
+        }
 
-        backBtn.addEventListener('click', function() {
-            homeView.style.display = 'flex';
-            detailView.style.display = 'none';
-            customCursor.style.display = 'none';
-            cameraUI.style.display = 'flex';
-
-            currentActiveSwiper = homeSwiper;
-            updateCameraUI(homeSwiper);
-        });
+        document.getElementById('menu-home-btn').addEventListener('click', goToHome);
+        backBtn.addEventListener('click', goToHome);
 
         // --- 6. เมาส์วงกลม ---
         window.addEventListener('mousemove', function(e) {
