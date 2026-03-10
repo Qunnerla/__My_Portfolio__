@@ -3,19 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PORTFOLIO</title>
+    <title>KUNANON | PORTFOLIO</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
     <style>
-        /* =========================================
-           🌑 1. พื้นหลัง Cinematic & Film Grain 🌑 
-           ========================================= */
+        /* --- 1. Global Setup & Cinematic Background --- */
         body { 
-            margin: 0; 
-            background-color: #050505; 
-            background-image: radial-gradient(circle at 50% 50%, #1c1c1c 0%, #050505 80%);
-            color: #fff; 
-            font-family: 'Segoe UI', sans-serif; 
+            margin: 0; background-color: #050505; color: #fff; 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             overflow: hidden; 
+            background-image: radial-gradient(circle at 50% 50%, #1c1c1c 0%, #050505 80%);
         }
         body::before {
             content: ""; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
@@ -23,133 +19,82 @@
             opacity: 0.04; pointer-events: none; z-index: 0;
         }
 
-        .container { position: relative; width: 100vw; height: 100vh; touch-action: pan-y; z-index: 1; }
-
-        /* =========================================
-           🎛️ 2. Navbar & ปุ่มเมนู Camera Control 🎛️
-           ========================================= */
+        /* --- 2. Navigation & Buttons --- */
         .navbar { position: fixed; top: 0; width: 100%; padding: 30px 50px; display: flex; justify-content: space-between; align-items: center; box-sizing: border-box; z-index: 100; mix-blend-mode: difference; }
         .logo { font-size: 1.2rem; font-weight: bold; letter-spacing: 2px; text-transform: uppercase; }
         
         .camera-pill-btn {
-            width: 64px; height: 28px; border-radius: 14px;
-            background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.3);
-            backdrop-filter: blur(10px); cursor: pointer; position: relative;
+            width: 64px; height: 28px; border-radius: 14px; background: rgba(255,255,255,0.1); 
+            border: 1px solid rgba(255,255,255,0.3); backdrop-filter: blur(10px); cursor: pointer; 
             display: flex; align-items: center; padding: 0 4px; transition: 0.3s; z-index: 101;
             box-shadow: inset 0 2px 4px rgba(0,0,0,0.5);
         }
-        .camera-pill-btn .indicator {
-            width: 20px; height: 20px; border-radius: 10px; background: white;
-            transition: 0.4s cubic-bezier(0.25, 1, 0.5, 1); box-shadow: 0 0 10px rgba(255,255,255,0.5);
-        }
-        .camera-pill-btn.active { background: rgba(255, 255, 255, 0.2); border-color: #ffcc00; }
-        .camera-pill-btn.active .indicator { transform: translateX(34px); background: #ffcc00; box-shadow: 0 0 15px #ffcc00; width: 22px; }
+        .camera-pill-btn .indicator { width: 20px; height: 20px; border-radius: 10px; background: white; transition: 0.4s cubic-bezier(0.25, 1, 0.5, 1); }
+        .camera-pill-btn.active .indicator { transform: translateX(34px); background: #ff416c; box-shadow: 0 0 15px #ff416c; }
 
-        .nav-menu { position: fixed; top: 0; left: 0; width: 100%; height: 100vh; background: rgba(0,0,0,0.95); z-index: 90; display: flex; justify-content: center; align-items: center; opacity: 0; pointer-events: none; transition: 0.4s ease-in-out; }
+        .nav-menu { position: fixed; inset: 0; background: rgba(0,0,0,0.95); z-index: 95; display: flex; justify-content: center; align-items: center; opacity: 0; pointer-events: none; transition: 0.4s; }
         .nav-menu.active { opacity: 1; pointer-events: all; }
-        .nav-menu ul { list-style: none; padding: 0; text-align: center; }
-        .nav-menu li { font-size: 2rem; margin: 25px 0; cursor: pointer; transition: 0.3s; font-weight: bold; color: #fff; letter-spacing: 2px; }
+        .nav-menu ul { list-style: none; text-align: center; padding: 0; }
+        .nav-menu li { font-size: 2rem; margin: 20px 0; cursor: pointer; transition: 0.3s; font-weight: bold; }
         .nav-menu li:hover { color: #ffcc00; transform: scale(1.1); }
-        .menu-home { color: #888 !important; font-size: 1.2rem !important; margin-bottom: 40px !important; }
 
-        /* =========================================
-           📸 3. ระบบหน้าจอ Camera UI (สเกลแนวตรง) 📸
-           ========================================= */
+        /* --- 3. Camera UI & Scale --- */
         #camera-ui {
             position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%);
             z-index: 100; display: flex; flex-direction: column; align-items: center; pointer-events: none;
         }
-        .scale-window {
-            width: 250px; height: 30px; position: relative; overflow: hidden;
-            -webkit-mask-image: linear-gradient(90deg, transparent, black 40%, black 60%, transparent);
-        }
-        .scale-track {
-            position: absolute; left: 50%; top: 0; height: 100%; display: flex; align-items: flex-end;
-            transition: transform 0.3s cubic-bezier(0.25, 1, 0.5, 1);
-        }
-        .scale-tick {
-            width: 2px; height: 12px; background: rgba(255,255,255,0.4); margin: 0 8px; border-radius: 1px; flex-shrink: 0;
-        }
+        .scale-window { width: 250px; height: 30px; position: relative; overflow: hidden; -webkit-mask-image: linear-gradient(90deg, transparent, black 40%, black 60%, transparent); }
+        .scale-track { position: absolute; left: 50%; display: flex; align-items: flex-end; transition: 0.3s cubic-bezier(0.25, 1, 0.5, 1); }
+        .scale-tick { width: 2px; height: 12px; background: rgba(255,255,255,0.4); margin: 0 8px; flex-shrink: 0; border-radius: 1px; }
         .scale-tick.major { height: 20px; background: rgba(255,255,255,0.8); }
-        .center-mark {
-            position: absolute; bottom: 0; left: 50%; transform: translateX(-50%);
-            width: 3px; height: 26px; background: #ffcc00; border-radius: 2px; box-shadow: 0 0 10px #ffcc00;
-        }
-        .camera-number {
-            color: #ffcc00; font-size: 1.2rem; font-weight: bold; margin-top: 8px;
-            letter-spacing: 2px; text-shadow: 0 2px 10px rgba(0,0,0,0.8);
-        }
+        .center-mark { position: absolute; bottom: 0; left: 50%; transform: translateX(-50%); width: 3px; height: 26px; background: #ffcc00; box-shadow: 0 0 10px #ffcc00; z-index: 2; }
+        .camera-number { color: #ffcc00; font-size: 1.2rem; font-weight: bold; margin-top: 8px; letter-spacing: 2px; }
 
-        /* เมาส์วงกลม */
-        .cursor { width: 40px; height: 40px; border: 1px solid white; border-radius: 50%; position: fixed; pointer-events: none; transform: translate(-50%, -50%); z-index: 999; transition: width 0.3s, height 0.3s, background-color 0.3s; mix-blend-mode: difference; display: none; }
-        .cursor.active { width: 60px; height: 60px; background-color: rgba(255,255,255,0.2); backdrop-filter: blur(2px); }
+        /* --- 4. Content Views --- */
+        .container { position: relative; width: 100vw; height: 100vh; z-index: 1; }
+        .home-slide { width: 350px; height: 550px; background-size: cover; border-radius: 20px; display: flex; align-items: flex-end; overflow: hidden; }
+        .home-slide::after { content: ''; position: absolute; inset: 0; background: linear-gradient(transparent, rgba(0,0,0,0.9)); }
+        .home-slide .content { position: relative; z-index: 2; padding: 30px; text-align: center; width: 100%; }
 
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
-        .fade-in { animation: fadeIn 0.6s ease-out forwards; }
+        #detail-view { position: fixed; inset: 0; z-index: 50; padding-top: 100px; overflow-y: auto; display: none; background: #050505; }
+        .detail-header { padding: 0 50px; margin-bottom: 40px; }
+        #back-btn { background: none; border: none; color: #888; cursor: pointer; margin-bottom: 10px; }
 
-        /* =========================================
-           หน้าหลัก (Home View)
-           ========================================= */
-        #home-view { display: flex; align-items: center; justify-content: center; }
-        .homeSwiper { width: 100%; padding-top: 50px; padding-bottom: 50px; }
-        .home-slide {
-            width: 350px; height: 550px; background-position: center; background-size: cover;
-            border-radius: 20px; box-shadow: 0 20px 50px rgba(0,0,0,0.8);
-            position: relative; overflow: hidden; display: flex; align-items: flex-end; transition: 0.3s;
-        }
-        .home-slide::after { content: ''; position: absolute; bottom: 0; left: 0; width: 100%; height: 70%; background: linear-gradient(transparent, rgba(0,0,0,0.95)); z-index: 1; }
-        .home-slide .content { position: relative; z-index: 2; padding: 30px; width: 100%; box-sizing: border-box; text-align: center; }
-        .home-slide .name { font-size: 2.5rem; font-weight: bold; margin-bottom: 10px; text-transform: uppercase; }
-        .home-slide .des { font-size: 1rem; color: #ccc; margin-bottom: 25px; line-height: 1.5; }
-        .home-slide .open-folder { padding: 12px 24px; background: #fff; color: #000; border: none; border-radius: 30px; font-weight: bold; cursor: pointer; transition: 0.3s; width: 100%; font-size: 1.1rem; }
-        .home-slide .open-folder:hover { background: #ffcc00; color: black; transform: scale(1.05); }
+        /* Project Swiper Styling */
+        .project-group .swiper-slide { width: auto; height: 65vh; display: flex; align-items: center; }
+        .grid-item { border-radius: 15px; overflow: hidden; box-shadow: 0 20px 40px rgba(0,0,0,0.6); }
+        .grid-item img, .grid-item video { height: 100%; width: auto; display: block; transition: 0.5s; }
 
-        /* =========================================
-           หน้าจอรายละเอียดผลงาน
-           ========================================= */
-        #detail-view { position: absolute; top: 0; left: 0; width: 100%; height: 100vh; z-index: 50; padding-top: 100px; overflow-y: auto; box-sizing: border-box; }
-        .detail-header { padding: 0 50px; margin-bottom: 40px; max-width: 1500px; margin-left: auto; margin-right: auto; }
-        #back-btn { background: none; border: none; color: #888; font-size: 1rem; cursor: pointer; padding: 0; margin-bottom: 20px; transition: color 0.3s; }
-        #back-btn:hover { color: #fff; }
-        #detail-title { font-size: 4rem; margin: 0; text-transform: uppercase; }
-
-        .profile-container { display: flex; gap: 50px; padding: 0 50px 100px 50px; flex-wrap: wrap; max-width: 1500px; margin: 0 auto; }
-        .profile-image-box { flex: 1; min-width: 300px; max-width: 450px; }
-        .profile-image-box img { width: 100%; border-radius: 20px; box-shadow: 0 10px 30px rgba(255,255,255,0.05); object-fit: cover; }
+        /* Profile Section */
+        .profile-container { display: flex; gap: 50px; padding: 0 50px 100px; flex-wrap: wrap; max-width: 1400px; margin: 0 auto; }
+        .profile-image-box { flex: 1; min-width: 300px; }
+        .profile-image-box img { width: 100%; border-radius: 20px; }
         .profile-info-box { flex: 2; min-width: 300px; }
-        .profile-info-box h2 { font-size: 2rem; border-bottom: 1px solid #333; padding-bottom: 10px; margin-top: 0; }
-        .profile-info-box h3 { color: #888; font-size: 1.2rem; margin-top: 30px; margin-bottom: 15px; }
-        .profile-info-box p { font-size: 1.1rem; line-height: 1.8; color: #ccc; margin: 8px 0; }
-        .progress-bar-bg { width: 100%; height: 10px; background-color: rgba(255,255,255,0.1); border-radius: 10px; overflow: hidden; }
-        .progress-fill { height: 100%; background: linear-gradient(90deg, #ffcc00, #ff9900); border-radius: 10px; }
         
-        /* วงล้อผลงานด้านใน */
-        .project-group { padding: 0 !important; display: none; }
-        .project-group[style*="display: block"] { display: block !important; }
-        .project-group .swiper { width: 100%; padding-top: 20px; padding-bottom: 100px; }
-        .project-group .swiper-slide { width: auto !important; height: 60vh; display: flex; justify-content: center; align-items: center; transition: 0.3s; }
-        
-        .grid-item { position: relative; width: auto; height: 100%; background: transparent !important; border-radius: 15px; overflow: hidden; cursor: none; }
-        .grid-item img, .grid-item video { width: auto; height: 100%; display: block; object-fit: cover; transition: transform 0.8s ease; box-shadow: 0 15px 40px rgba(0,0,0,0.8); border-radius: 15px; }
-        .grid-item:hover img, .grid-item:hover video { transform: scale(1.03); }
+        .progress-bar-bg { width: 100%; height: 8px; background: rgba(255,255,255,0.1); border-radius: 4px; margin: 10px 0 20px; overflow: hidden; }
+        .progress-fill { height: 100%; background: #ffcc00; transition: 1.5s; }
+        .skill-header { display: flex; align-items: center; gap: 10px; font-weight: bold; }
+        .skill-logo { width: 20px; }
 
-        .overlay { position: absolute; bottom: 0; left: 0; width: 100%; padding: 30px; background: linear-gradient(transparent, rgba(0,0,0,0.8)); box-sizing: border-box; opacity: 0; transform: translateY(20px); transition: all 0.4s ease; pointer-events: none; }
-        .grid-item:hover .overlay { opacity: 1; transform: translateY(0); }
-        .overlay h3 { margin: 0; font-size: 1.5rem; } .overlay p { margin: 5px 0 0 0; color: #ccc; font-size: 0.9rem; }
+        /* Cursor */
+        .cursor { width: 40px; height: 40px; border: 1px solid white; border-radius: 50%; position: fixed; pointer-events: none; transform: translate(-50%, -50%); z-index: 999; mix-blend-mode: difference; display: none; transition: 0.2s; }
+        .cursor.active { width: 60px; height: 60px; background: rgba(255,255,255,0.1); }
+
+        .fade-in { animation: fadeIn 0.8s ease forwards; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
 
         @media (max-width: 768px) {
-            .navbar { padding: 20px 25px; }
-            #camera-ui { bottom: 20px; }
-            .home-slide { width: 80vw; height: 55vh; }
-            .project-group .swiper-slide { width: 85vw !important; height: auto !important; }
-            .grid-item img, .grid-item video { width: 100%; height: auto; max-height: 55vh; }
+            .home-slide { width: 80vw; }
+            .profile-container { padding: 0 20px 100px; }
+            .project-group .swiper-slide { height: 50vh; width: 85vw; }
+            .grid-item img, .grid-item video { width: 100%; height: auto; }
         }
     </style>
 </head>
 <body>
 
     <nav class="navbar">
-        <div class="logo">PORTFOLIO</div>
+        <div class="logo">KUNANON.CH</div>
         <div class="camera-pill-btn" id="hamburger-btn">
             <div class="indicator"></div>
         </div>
@@ -157,13 +102,13 @@
 
     <div class="nav-menu" id="nav-menu">
         <ul>
-            <li class="menu-home" id="menu-home-btn">HOME (หน้าหลัก)</li>
+            <li onclick="goToHome()">HOME</li>
             <li class="menu-link" data-title="ABOUT ME" data-target="profile-section" data-type="flex">PROFILE</li>
-            <li class="menu-link" data-title="YEAR 1 PROJECTS" data-target="year1-projects" data-type="block">YEAR 1</li>
-            <li class="menu-link" data-title="YEAR 2 PROJECTS" data-target="year2-projects" data-type="block">YEAR 2</li>
-            <li class="menu-link" data-title="YEAR 3 PROJECTS" data-target="year3-projects" data-type="block">YEAR 3</li>
-            <li class="menu-link" data-title="YEAR 4 PROJECTS" data-target="year4-projects" data-type="block">YEAR 4</li>
-            <li class="menu-link" data-title="MY FAVORITE WORKS" data-target="favorite-projects" data-type="block">ART WORK</li>
+            <li class="menu-link" data-title="YEAR 1" data-target="year1-projects" data-type="block">YEAR 1</li>
+            <li class="menu-link" data-title="YEAR 2" data-target="year2-projects" data-type="block">YEAR 2</li>
+            <li class="menu-link" data-title="YEAR 3" data-target="year3-projects" data-type="block">YEAR 3</li>
+            <li class="menu-link" data-title="YEAR 4" data-target="year4-projects" data-type="block">YEAR 4</li>
+            <li class="menu-link" data-title="ART WORK" data-target="favorite-projects" data-type="block">ART WORK</li>
         </ul>
     </div>
 
@@ -172,185 +117,202 @@
             <div class="scale-track" id="scale-track"></div>
             <div class="center-mark"></div>
         </div>
-        <div class="camera-number" id="camera-number">1 / 6</div>
+        <div class="camera-number" id="camera-number">1 / 1</div>
     </div>
 
     <div class="cursor" id="custom-cursor"></div>
 
-    <div id="home-view" class="container fade-in">
+    <main id="home-view" class="container fade-in">
         <div class="swiper homeSwiper">
             <div class="swiper-wrapper">
                 <div class="swiper-slide home-slide" style="background-image: url('https://i.postimg.cc/cJDkBn2y/DSC005691.jpg');">
-                    <div class="content"><div class="name">PROFILE</div><div class="des">ประวัติและทักษะ</div><button class="open-folder" data-title="ABOUT ME" data-target="profile-section" data-type="flex">ดูประวัติ</button></div>
+                    <div class="content"><h2>PROFILE</h2><p>ประวัติและทักษะ</p><button class="open-folder" data-title="ABOUT ME" data-target="profile-section" data-type="flex">VIEW PROFILE</button></div>
                 </div>
                 <div class="swiper-slide home-slide" style="background-image: url('https://i.postimg.cc/mgVWKhK2/Artboard-1.jpg');">
-                    <div class="content"><div class="name">YEAR 1</div><div class="des">ผลงานชั้นปีที่ 1</div><button class="open-folder" data-title="YEAR 1 PROJECTS" data-target="year1-projects" data-type="block">ดูผลงาน</button></div>
+                    <div class="content"><h2>YEAR 1</h2><p>ผลงานเริ่มต้น</p><button class="open-folder" data-title="YEAR 1" data-target="year1-projects" data-type="block">VIEW WORKS</button></div>
                 </div>
                 <div class="swiper-slide home-slide" style="background-image: url('https://i.postimg.cc/L89rk25G/Artboard-2.jpg');">
-                    <div class="content"><div class="name">YEAR 2</div><div class="des">ผลงานชั้นปีที่ 2</div><button class="open-folder" data-title="YEAR 2 PROJECTS" data-target="year2-projects" data-type="block">ดูผลงาน</button></div>
+                    <div class="content"><h2>YEAR 2</h2><p>การพัฒนาฝีมือ</p><button class="open-folder" data-title="YEAR 2" data-target="year2-projects" data-type="block">VIEW WORKS</button></div>
                 </div>
                 <div class="swiper-slide home-slide" style="background-image: url('https://i.postimg.cc/Hn0h5hgp/Artboard-3.jpg');">
-                    <div class="content"><div class="name">YEAR 3</div><div class="des">ผลงานชั้นปีที่ 3</div><button class="open-folder" data-title="YEAR 3 PROJECTS" data-target="year3-projects" data-type="block">ดูผลงาน</button></div>
+                    <div class="content"><h2>YEAR 3</h2><p>ผลงานปัจจุบัน</p><button class="open-folder" data-title="YEAR 3" data-target="year3-projects" data-type="block">VIEW WORKS</button></div>
                 </div>
                 <div class="swiper-slide home-slide" style="background-image: url('https://i.postimg.cc/Qddy9mYz/Artboard-4.jpg');">
-                    <div class="content"><div class="name">YEAR 4</div><div class="des">ผลงานชั้นปีที่ 4</div><button class="open-folder" data-title="YEAR 4 PROJECTS" data-target="year4-projects" data-type="block">ดูผลงาน</button></div>
+                    <div class="content"><h2>YEAR 4</h2><p>โปรเจกต์จบการศึกษา</p><button class="open-folder" data-title="YEAR 4" data-target="year4-projects" data-type="block">VIEW WORKS</button></div>
                 </div>
                 <div class="swiper-slide home-slide" style="background-image: url('https://i.postimg.cc/5t4njWbX/Comp-5.gif');">
-                    <div class="content"><div class="name">ART WORK</div><div class="des">ผลงานส่วนตัว</div><button class="open-folder" data-title="MY FAVORITE WORKS" data-target="favorite-projects" data-type="block">ดูผลงาน</button></div>
+                    <div class="content"><h2>ART WORK</h2><p>ความชอบส่วนตัว</p><button class="open-folder" data-title="ART WORK" data-target="favorite-projects" data-type="block">VIEW ART</button></div>
                 </div>
             </div>
         </div>
-    </div>
+    </main>
 
-    <div id="detail-view" style="display: none;">
-        <div class="detail-header fade-in">
-            <button id="back-btn">← BACK TO FOLDERS</button>
+    <div id="detail-view">
+        <div class="detail-header">
+            <button id="back-btn" onclick="goToHome()">← BACK TO HOME</button>
             <h1 id="detail-title">PROJECTS</h1>
         </div>
-        
-        <div id="profile-section" class="view-group profile-container fade-in" style="display: none;">
-             <div class="profile-image-box"><img src="https://i.postimg.cc/6qVQDtdG/DSC00569.jpg" alt="Boat"></div>
-             <div class="profile-info-box"><h2>Profile</h2><p>ชื่อเล่น โบ๊ท อายุ 22 ปี นักศึกษาดิจิทัลอาร์ต...</p></div>
-        </div>
 
-        <div id="year1-projects" class="view-group project-group fade-in" style="display: none;">
-            <div class="grid-item"><img src="https://i.postimg.cc/gjZpxZmZ/IMG-3874.jpg" alt="Work"></div>
-            <div class="grid-item"><img src="https://i.postimg.cc/tgv7PFQ6/IMG-3875.jpg" alt="Work"></div>
-            <div class="grid-item"><img src="https://i.postimg.cc/HxCk1m5m/IMG-3876.jpg" alt="Work"></div>
-            <div class="grid-item"><img src="https://i.postimg.cc/QxS9gF7k/IMG-3878.jpg" alt="Work"></div>
-            <div class="grid-item"><img src="https://i.postimg.cc/SRF8PHQL/IMG-3877.jpg" alt="Work"></div>
-        </div>
+        <section id="profile-section" class="view-group profile-container">
+            <div class="profile-image-box"><img src="https://i.postimg.cc/6qVQDtdG/DSC00569.jpg" alt="Profile"></div>
+            <div class="profile-info-box">
+                <h2>Kunanon Chaisamart (Boat)</h2>
+                <p>นักศึกษาชั้นปีที่ 3 สาขาดิจิทัลอาร์ต มีความหลงใหลในการทำ 2D Motion และ Idle Loop Animation พร้อมที่จะเรียนรู้และพัฒนาสิ่งใหม่ๆ อยู่เสมอ</p>
+                
+                <h3>My Skills</h3>
+                <div class="skill-item">
+                    <div class="skill-header"><img src="https://i.postimg.cc/9fBJF7Cs/images.png" class="skill-logo"> After Effects</div>
+                    <div class="progress-bar-bg"><div class="progress-fill" style="width: 90%;"></div></div>
+                </div>
+                <div class="skill-item">
+                    <div class="skill-header"><img src="https://i.postimg.cc/KcppMBLs/Adobe-Photoshop-CC-icon-svg.png" class="skill-logo"> Photoshop</div>
+                    <div class="progress-bar-bg"><div class="progress-fill" style="width: 95%;"></div></div>
+                </div>
 
-        <div id="year2-projects" class="view-group project-group fade-in" style="display: none;">
-            <div class="grid-item"><img src="https://i.postimg.cc/j2Tz3Bvz/AMBIGUOUS-FG02.jpg" alt="Work"></div>
-            <div class="grid-item"><img src="https://i.postimg.cc/2yLPTbct/STABLE-FG01.jpg" alt="Work"></div>
-        </div>
+                <h3>Contact</h3>
+                <p>📧 chaisamartk@gmail.com | 📞 080-723-7949</p>
+            </div>
+        </section>
 
-        <div id="year3-projects" class="view-group project-group fade-in" style="display: none;">
-             <div class="grid-item"><img src="https://i.postimg.cc/Cx3MT8nC/7.jpg" alt="Work"></div>
-        </div>
+        <section id="year1-projects" class="view-group project-group">
+            <div class="grid-item"><img src="https://i.postimg.cc/gjZpxZmZ/IMG-3874.jpg"></div>
+            <div class="grid-item"><img src="https://i.postimg.cc/tgv7PFQ6/IMG-3875.jpg"></div>
+            <div class="grid-item"><img src="https://i.postimg.cc/HxCk1m5m/IMG-3876.jpg"></div>
+        </section>
 
-        <div id="year4-projects" class="view-group project-group fade-in" style="display: none;">
-            <div class="grid-item"><img src="https://i.postimg.cc/Qddy9mYz/Artboard-4.jpg" alt="Coming Soon"></div>
-        </div>
+        <section id="year2-projects" class="view-group project-group">
+            <div class="grid-item"><img src="https://i.postimg.cc/j2Tz3Bvz/AMBIGUOUS-FG02.jpg"></div>
+            <div class="grid-item"><img src="https://i.postimg.cc/2yLPTbct/STABLE-FG01.jpg"></div>
+            <div class="grid-item"><img src="https://i.postimg.cc/X7bbxxWr/Similarity-Stairs.jpg"></div>
+        </section>
 
-        <div id="favorite-projects" class="view-group project-group fade-in" style="display: none;">
-            <div class="grid-item"><video autoplay loop muted playsinline><source src="Airi-Witching-Hour.mp4" type="video/mp4"></video></div>
-            <div class="grid-item"><video autoplay loop muted playsinline><source src="Aya-Cinnamoroll-Dream.mp4" type="video/mp4"></video></div>
-            <div class="grid-item"><video autoplay loop muted playsinline><source src="Diao-chan-Elemental-Divinity.mp4" type="video/mp4"></video></div>
-            <div class="grid-item"><video autoplay loop muted playsinline><source src="Hayate-Kid-the-Phantom.mp4" type="video/mp4"></video></div>
-            <div class="grid-item"><video autoplay loop muted playsinline><source src="Iggy-Rimuru-Tempest.mp4" type="video/mp4"></video></div>
-            <div class="grid-item"><video autoplay loop muted playsinline><source src="Liliana-Witching-Hour.mp4" type="video/mp4"></video></div>
-            <div class="grid-item"><video autoplay loop muted playsinline><source src="Murad-Moon-Chuser.mp4" type="video/mp4"></video></div>
-            <div class="grid-item"><video autoplay loop muted playsinline><source src="Nakroth-Stellar-Troupe.mp4" type="video/mp4"></video></div>
-        </div>
+        <section id="favorite-projects" class="view-group project-group">
+            <div class="grid-item"><video autoplay loop muted playsinline><source src="Airi-Witching-Hour.mp4"></video></div>
+            <div class="grid-item"><video autoplay loop muted playsinline><source src="Aya-Cinnamoroll-Dream.mp4"></video></div>
+        </section>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
-
     <script>
-        // --- 1. สร้างขีดสเกล ---
+        // 1. Setup Camera Scale Ticks
         const scaleTrack = document.getElementById('scale-track');
-        for(let i=0; i<60; i++) {
-            let tick = document.createElement('div');
-            tick.className = (i % 5 === 0) ? 'scale-tick major' : 'scale-tick';
+        for(let i=0; i<40; i++) {
+            const tick = document.createElement('div');
+            tick.className = i % 5 === 0 ? 'scale-tick major' : 'scale-tick';
             scaleTrack.appendChild(tick);
         }
 
-        // --- 2. ฟังก์ชันอัปเดตตัวเลข (Real Index) และสเกล ---
-        const cameraNumber = document.getElementById('camera-number');
-        const tickStep = 18; 
-        
+        let currentActiveSwiper = null;
+        const tickStep = 18;
+
         function updateCameraUI(swiper) {
-            // ✅ ใช้ slides.length ที่เป็นงานจริงๆ และ realIndex เพื่อความแม่นยำ ✅
-            const total = swiper.slides.length;
-            const current = swiper.realIndex + 1;
-            cameraNumber.innerText = `${current} / ${total}`;
-            scaleTrack.style.transform = `translateX(${-swiper.realIndex * tickStep}px)`;
+            if(!swiper) return;
+            document.getElementById('camera-number').innerText = `${swiper.activeIndex + 1} / ${swiper.slides.length}`;
+            scaleTrack.style.transform = `translateX(${-swiper.activeIndex * tickStep}px)`;
         }
 
-        // --- 3. Swiper หน้าหลัก ---
+        // 2. Initialize Main Home Swiper
         const homeSwiper = new Swiper(".homeSwiper", {
-            effect: "coverflow",
-            grabCursor: true, centeredSlides: true, slidesPerView: "auto", initialSlide: 1,
+            effect: "coverflow", centeredSlides: true, slidesPerView: "auto",
             coverflowEffect: { rotate: 20, stretch: 0, depth: 250, modifier: 1, slideShadows: true },
-            on: {
-                init: function() { updateCameraUI(this); },
-                slideChange: function () { updateCameraUI(this); }
-            }
+            mousewheel: true,
+            on: { init: function() { updateCameraUI(this); }, slideChange: function() { updateCameraUI(this); } }
         });
+        currentActiveSwiper = homeSwiper;
 
-        // --- 4. เมนู ---
-        const hamburgerBtn = document.getElementById('hamburger-btn');
+        // 3. Navigation & Page Switching
         const navMenu = document.getElementById('nav-menu');
+        const hamburgerBtn = document.getElementById('hamburger-btn');
+        const cameraUI = document.getElementById('camera-ui');
+        const customCursor = document.getElementById('custom-cursor');
+
         function toggleMenu() {
             hamburgerBtn.classList.toggle('active');
             navMenu.classList.toggle('active');
         }
         hamburgerBtn.addEventListener('click', toggleMenu);
 
-        // --- 5. ระบบจัดการหน้าจอและสร้าง Swiper ด้านใน ---
-        const homeView = document.getElementById('home-view');
-        const detailView = document.getElementById('detail-view');
-        const backBtn = document.getElementById('back-btn');
-        const cameraUI = document.getElementById('camera-ui');
-        const customCursor = document.getElementById('custom-cursor');
+        function goToHome() {
+            document.getElementById('home-view').style.display = 'flex';
+            document.getElementById('detail-view').style.display = 'none';
+            cameraUI.style.display = 'flex';
+            customCursor.style.display = 'none';
+            currentActiveSwiper = homeSwiper;
+            updateCameraUI(homeSwiper);
+            if(navMenu.classList.contains('active')) toggleMenu();
+        }
+
+        let innerSwipers = {};
+        document.querySelectorAll('.open-folder, .menu-link').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const targetId = this.dataset.target;
+                const type = this.dataset.type;
+                const title = this.dataset.title;
+
+                document.getElementById('home-view').style.display = 'none';
+                document.getElementById('detail-view').style.display = 'block';
+                document.getElementById('detail-title').innerText = title;
+
+                // Hide all groups first
+                document.querySelectorAll('.view-group').forEach(g => g.style.display = 'none');
+                const targetGroup = document.getElementById(targetId);
+                targetGroup.style.display = type;
+
+                // 🔴 LOGIC: Camera UI Visibility
+                if(targetId === 'profile-section') {
+                    cameraUI.style.display = 'none';
+                    customCursor.style.display = 'none';
+                } else {
+                    cameraUI.style.display = 'flex';
+                    customCursor.style.display = 'block';
+                    initInnerSwiper(targetId);
+                }
+
+                if(navMenu.classList.contains('active')) toggleMenu();
+            });
+        });
 
         function initInnerSwiper(groupId) {
             const group = document.getElementById(groupId);
             if (group.querySelector('.swiper')) {
-                updateCameraUI(group.querySelector('.swiper').swiper);
+                currentActiveSwiper = innerSwipers[groupId];
+                updateCameraUI(currentActiveSwiper);
                 return;
             }
-            const swiperContainer = document.createElement('div');
-            swiperContainer.className = `swiper innerSwiper-${groupId}`;
-            const swiperWrapper = document.createElement('div');
-            swiperWrapper.className = 'swiper-wrapper';
-            const items = Array.from(group.querySelectorAll('.grid-item'));
-            items.forEach(item => { item.classList.add('swiper-slide'); swiperWrapper.appendChild(item); });
-            swiperContainer.appendChild(swiperWrapper);
-            group.appendChild(swiperContainer);
 
-            new Swiper(`.innerSwiper-${groupId}`, {
-                effect: "coverflow", grabCursor: true, centeredSlides: true, slidesPerView: "auto",
-                coverflowEffect: { rotate: 35, stretch: 0, depth: 350, modifier: 1, slideShadows: true },
-                on: {
-                    init: function() { updateCameraUI(this); },
-                    slideChange: function () { updateCameraUI(this); }
-                }
+            const wrapper = document.createElement('div');
+            wrapper.className = 'swiper-wrapper';
+            Array.from(group.children).forEach(item => {
+                item.classList.add('swiper-slide');
+                wrapper.appendChild(item);
             });
+
+            const container = document.createElement('div');
+            container.className = `swiper inner-${groupId}`;
+            container.appendChild(wrapper);
+            group.appendChild(container);
+
+            const sw = new Swiper(`.inner-${groupId}`, {
+                effect: "coverflow", centeredSlides: true, slidesPerView: "auto",
+                coverflowEffect: { rotate: 30, depth: 300, modifier: 1, slideShadows: true },
+                mousewheel: true,
+                on: { init: function() { updateCameraUI(this); }, slideChange: function() { updateCameraUI(this); } }
+            });
+            innerSwipers[groupId] = sw;
+            currentActiveSwiper = sw;
         }
 
-        document.querySelectorAll('.open-folder, .menu-link').forEach(btn => {
-            btn.addEventListener('click', function() {
-                if (navMenu.classList.contains('active')) toggleMenu();
-                const targetId = this.getAttribute('data-target');
-                const displayType = this.getAttribute('data-type');
-                
-                document.getElementById('detail-title').innerText = this.getAttribute('data-title');
-                document.querySelectorAll('.view-group').forEach(g => g.style.display = 'none');
-                document.getElementById(targetId).style.display = displayType;
-                
-                homeView.style.display = 'none';
-                detailView.style.display = 'block';
-                cameraUI.style.display = (targetId === 'profile-section') ? 'none' : 'flex';
-                customCursor.style.display = (displayType === 'block') ? 'block' : 'none';
-
-                if(displayType === 'block' && targetId !== 'profile-section') initInnerSwiper(targetId);
-            });
-        });
-
-        const goHome = () => {
-            homeView.style.display = 'flex'; detailView.style.display = 'none';
-            cameraUI.style.display = 'flex'; customCursor.style.display = 'none';
-            updateCameraUI(homeSwiper);
-        };
-        backBtn.addEventListener('click', goHome);
-        document.getElementById('menu-home-btn').addEventListener('click', goHome);
-
+        // 4. Cursor Follower
         window.addEventListener('mousemove', e => {
             customCursor.style.left = e.clientX + 'px';
             customCursor.style.top = e.clientY + 'px';
+        });
+
+        document.addEventListener('mouseover', e => {
+            if(e.target.closest('.grid-item, .home-slide, button')) customCursor.classList.add('active');
+        });
+        document.addEventListener('mouseout', e => {
+            customCursor.classList.remove('active');
         });
     </script>
 </body>
