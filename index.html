@@ -117,10 +117,6 @@
         }
         .home-slide .open-folder:hover { background: #ff416c; color: white; transform: scale(1.05); }
 
-        .controls { position: absolute; bottom: 40px; left: 50%; transform: translateX(-50%); z-index: 10; display: flex; gap: 20px; }
-        .controls button { width: 50px; height: 50px; border-radius: 50%; border: 2px solid #fff; background: rgba(255,255,255,0.1); color: white; font-size: 20px; cursor: pointer; backdrop-filter: blur(5px); transition: 0.3s; }
-        .controls button:hover { background: #fff; color: #000; }
-
         /* =========================================
            หน้าจอรายละเอียดผลงาน (ด้านใน)
            ========================================= */
@@ -186,7 +182,6 @@
         }
 
         @media (max-width: 768px) {
-            .controls { display: none; }
             .home-slide { width: 80vw; height: 60vh; }
             .home-slide .name { font-size: 2rem; }
             .detail-header { padding: 0 20px; }
@@ -297,7 +292,7 @@
 
                 <div class="swiper-slide home-slide">
                     <video autoplay loop muted playsinline style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; z-index: 0;">
-                        <source src="Airi-Witching-Hour.mp4" type="video/mp4">
+                        <source src="Raz-Super-Striker-Wallpaper.mp4" type="video/mp4">
                     </video>
                     <div class="content" style="position: relative; z-index: 2;">
                         <div class="name">ART WORK</div>
@@ -307,11 +302,6 @@
                 </div>
 
             </div>
-        </div>
-        
-        <div class="controls">
-            <button id="home-prev">❮</button>
-            <button id="home-next">❯</button>
         </div>
     </div>
 
@@ -519,10 +509,6 @@
             },
             keyboard: { enabled: true },
             mousewheel: true, // 🔴 เปิดใช้งานลูกกลิ้งเมาส์ 🔴
-            navigation: {
-                nextEl: '#home-next',
-                prevEl: '#home-prev',
-            },
             on: {
                 init: function() { updateCameraUI(this); },
                 slideChange: function () { updateCameraUI(this); }
