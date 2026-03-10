@@ -3,316 +3,556 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>KUNANON | PORTFOLIO</title>
+    <title>PORTFOLIO</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
     <style>
-        /* --- 1. Global Setup & Cinematic Background --- */
-        body { 
-            margin: 0; background-color: #050505; color: #fff; 
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            overflow: hidden; 
-            background-image: radial-gradient(circle at 50% 50%, #1c1c1c 0%, #050505 80%);
-        }
-        body::before {
-            content: ""; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
-            opacity: 0.04; pointer-events: none; z-index: 0;
-        }
+        body { margin: 0; background-color: #050505; color: #fff; font-family: 'Segoe UI', sans-serif; overflow: hidden; }
+        .container { position: relative; width: 100vw; height: 100vh; touch-action: pan-y; }
 
-        /* --- 2. Navigation & Buttons --- */
+        /* Navbar & Menu */
         .navbar { position: fixed; top: 0; width: 100%; padding: 30px 50px; display: flex; justify-content: space-between; align-items: center; box-sizing: border-box; z-index: 100; mix-blend-mode: difference; }
         .logo { font-size: 1.2rem; font-weight: bold; letter-spacing: 2px; text-transform: uppercase; }
-        
-        .camera-pill-btn {
-            width: 64px; height: 28px; border-radius: 14px; background: rgba(255,255,255,0.1); 
-            border: 1px solid rgba(255,255,255,0.3); backdrop-filter: blur(10px); cursor: pointer; 
-            display: flex; align-items: center; padding: 0 4px; transition: 0.3s; z-index: 101;
-            box-shadow: inset 0 2px 4px rgba(0,0,0,0.5);
-        }
-        .camera-pill-btn .indicator { width: 20px; height: 20px; border-radius: 10px; background: white; transition: 0.4s cubic-bezier(0.25, 1, 0.5, 1); }
-        .camera-pill-btn.active .indicator { transform: translateX(34px); background: #ff416c; box-shadow: 0 0 15px #ff416c; }
+        .hamburger { cursor: pointer; display: flex; flex-direction: column; gap: 6px; z-index: 101; transition: 0.3s; } 
+        .hamburger .line { width: 30px; height: 2px; background-color: white; transition: 0.3s; }
+        .hamburger.active .line:nth-child(1) { transform: translateY(8px) rotate(45deg); }
+        .hamburger.active .line:nth-child(2) { opacity: 0; }
+        .hamburger.active .line:nth-child(3) { transform: translateY(-8px) rotate(-45deg); }
 
-        .nav-menu { position: fixed; inset: 0; background: rgba(0,0,0,0.95); z-index: 95; display: flex; justify-content: center; align-items: center; opacity: 0; pointer-events: none; transition: 0.4s; }
+        .nav-menu { position: fixed; top: 0; left: 0; width: 100%; height: 100vh; background: rgba(0,0,0,0.95); z-index: 90; display: flex; justify-content: center; align-items: center; opacity: 0; pointer-events: none; transition: 0.4s ease-in-out; }
         .nav-menu.active { opacity: 1; pointer-events: all; }
-        .nav-menu ul { list-style: none; text-align: center; padding: 0; }
-        .nav-menu li { font-size: 2rem; margin: 20px 0; cursor: pointer; transition: 0.3s; font-weight: bold; }
-        .nav-menu li:hover { color: #ffcc00; transform: scale(1.1); }
+        .nav-menu ul { list-style: none; padding: 0; text-align: center; }
+        .nav-menu li { font-size: 2rem; margin: 25px 0; cursor: pointer; transition: 0.3s; font-weight: bold; color: #fff; letter-spacing: 2px; }
+        .nav-menu li:hover { color: #ff416c; transform: scale(1.1); }
+        .menu-home { color: #888 !important; font-size: 1.2rem !important; margin-bottom: 40px !important; }
 
-        /* --- 3. Camera UI & Scale --- */
-        #camera-ui {
-            position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%);
-            z-index: 100; display: flex; flex-direction: column; align-items: center; pointer-events: none;
+        /* เมาส์วงกลม */
+        .cursor { width: 40px; height: 40px; border: 1px solid white; border-radius: 50%; position: fixed; pointer-events: none; transform: translate(-50%, -50%); z-index: 999; transition: width 0.3s, height 0.3s, background-color 0.3s; mix-blend-mode: difference; display: none; }
+        .cursor.active { width: 60px; height: 60px; background-color: rgba(255,255,255,0.2); backdrop-filter: blur(2px); }
+
+        /* =========================================
+           🟢 1. หน้าหลัก (Home View) แบบ 3D Coverflow 🟢 
+           ========================================= */
+        #home-view {
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
-        .scale-window { width: 250px; height: 30px; position: relative; overflow: hidden; -webkit-mask-image: linear-gradient(90deg, transparent, black 40%, black 60%, transparent); }
-        .scale-track { position: absolute; left: 50%; display: flex; align-items: flex-end; transition: 0.3s cubic-bezier(0.25, 1, 0.5, 1); }
-        .scale-tick { width: 2px; height: 12px; background: rgba(255,255,255,0.4); margin: 0 8px; flex-shrink: 0; border-radius: 1px; }
-        .scale-tick.major { height: 20px; background: rgba(255,255,255,0.8); }
-        .center-mark { position: absolute; bottom: 0; left: 50%; transform: translateX(-50%); width: 3px; height: 26px; background: #ffcc00; box-shadow: 0 0 10px #ffcc00; z-index: 2; }
-        .camera-number { color: #ffcc00; font-size: 1.2rem; font-weight: bold; margin-top: 8px; letter-spacing: 2px; }
 
-        /* --- 4. Content Views --- */
-        .container { position: relative; width: 100vw; height: 100vh; z-index: 1; }
-        .home-slide { width: 350px; height: 550px; background-size: cover; border-radius: 20px; display: flex; align-items: flex-end; overflow: hidden; }
-        .home-slide::after { content: ''; position: absolute; inset: 0; background: linear-gradient(transparent, rgba(0,0,0,0.9)); }
-        .home-slide .content { position: relative; z-index: 2; padding: 30px; text-align: center; width: 100%; }
+        .homeSwiper {
+            width: 100%;
+            padding-top: 50px;
+            padding-bottom: 50px;
+        }
 
-        #detail-view { position: fixed; inset: 0; z-index: 50; padding-top: 100px; overflow-y: auto; display: none; background: #050505; }
-        .detail-header { padding: 0 50px; margin-bottom: 40px; }
-        #back-btn { background: none; border: none; color: #888; cursor: pointer; margin-bottom: 10px; }
+        /* กล่องหน้าปกแฟ้มแต่ละอัน */
+        .home-slide {
+            width: 350px;
+            height: 550px;
+            background-position: center;
+            background-size: cover;
+            border-radius: 20px;
+            box-shadow: 0 15px 40px rgba(0,0,0,0.6);
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            align-items: flex-end; /* ให้ข้อความไปอยู่ด้านล่าง */
+            transition: 0.3s;
+        }
 
-        /* Project Swiper Styling */
-        .project-group .swiper-slide { width: auto; height: 65vh; display: flex; align-items: center; }
-        .grid-item { border-radius: 15px; overflow: hidden; box-shadow: 0 20px 40px rgba(0,0,0,0.6); }
-        .grid-item img, .grid-item video { height: 100%; width: auto; display: block; transition: 0.5s; }
+        /* เงาดำไล่ระดับด้านล่างให้ตัวหนังสืออ่านง่าย */
+        .home-slide::after {
+            content: '';
+            position: absolute;
+            bottom: 0; left: 0; width: 100%; height: 70%;
+            background: linear-gradient(transparent, rgba(0,0,0,0.95));
+            z-index: 1;
+        }
 
-        /* Profile Section */
-        .profile-container { display: flex; gap: 50px; padding: 0 50px 100px; flex-wrap: wrap; max-width: 1400px; margin: 0 auto; }
-        .profile-image-box { flex: 1; min-width: 300px; }
-        .profile-image-box img { width: 100%; border-radius: 20px; }
-        .profile-info-box { flex: 2; min-width: 300px; }
-        
-        .progress-bar-bg { width: 100%; height: 8px; background: rgba(255,255,255,0.1); border-radius: 4px; margin: 10px 0 20px; overflow: hidden; }
-        .progress-fill { height: 100%; background: #ffcc00; transition: 1.5s; }
-        .skill-header { display: flex; align-items: center; gap: 10px; font-weight: bold; }
-        .skill-logo { width: 20px; }
+        .home-slide .content {
+            position: relative;
+            z-index: 2;
+            padding: 30px;
+            width: 100%;
+            box-sizing: border-box;
+            text-align: center;
+        }
 
-        /* Cursor */
-        .cursor { width: 40px; height: 40px; border: 1px solid white; border-radius: 50%; position: fixed; pointer-events: none; transform: translate(-50%, -50%); z-index: 999; mix-blend-mode: difference; display: none; transition: 0.2s; }
-        .cursor.active { width: 60px; height: 60px; background: rgba(255,255,255,0.1); }
+        .home-slide .name { font-size: 2.5rem; font-weight: bold; margin-bottom: 10px; text-transform: uppercase; text-shadow: 0 2px 10px rgba(0,0,0,0.5); }
+        .home-slide .des { font-size: 1rem; color: #ccc; margin-bottom: 25px; line-height: 1.5; }
+        .home-slide .open-folder { 
+            padding: 12px 24px; 
+            background: #fff; 
+            color: #000; 
+            border: none; 
+            border-radius: 30px; 
+            font-weight: bold; 
+            cursor: pointer; 
+            transition: 0.3s; 
+            width: 100%; 
+            font-size: 1.1rem;
+        }
+        .home-slide .open-folder:hover { background: #ff416c; color: white; transform: scale(1.05); }
 
-        .fade-in { animation: fadeIn 0.8s ease forwards; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        /* ปุ่มลูกศรซ้าย-ขวา (หน้าหลัก) */
+        .controls { position: absolute; bottom: 40px; left: 50%; transform: translateX(-50%); z-index: 10; display: flex; gap: 20px; }
+        .controls button { width: 50px; height: 50px; border-radius: 50%; border: 2px solid #fff; background: rgba(255,255,255,0.1); color: white; font-size: 20px; cursor: pointer; backdrop-filter: blur(5px); transition: 0.3s; }
+        .controls button:hover { background: #fff; color: #000; }
 
         @media (max-width: 768px) {
-            .home-slide { width: 80vw; }
-            .profile-container { padding: 0 20px 100px; }
-            .project-group .swiper-slide { height: 50vh; width: 85vw; }
-            .grid-item img, .grid-item video { width: 100%; height: auto; }
+            .home-slide { width: 280px; height: 450px; }
+            .home-slide .name { font-size: 2rem; }
+            .controls { display: none; }
+        }
+
+
+        /* =========================================
+           🔵 2. หน้าจอรายละเอียดผลงาน (ด้านใน) 🔵 
+           ========================================= */
+        #detail-view { position: absolute; top: 0; left: 0; width: 100%; height: 100vh; background-color: #050505; z-index: 50; padding-top: 100px; overflow-y: auto; box-sizing: border-box; }
+        .detail-header { padding: 0 50px; margin-bottom: 40px; max-width: 1500px; margin-left: auto; margin-right: auto; }
+        #back-btn { background: none; border: none; color: #888; font-size: 1rem; cursor: pointer; padding: 0; margin-bottom: 20px; transition: color 0.3s; }
+        #back-btn:hover { color: #fff; }
+        #detail-title { font-size: 4rem; margin: 0; text-transform: uppercase; }
+
+        .profile-container { display: flex; gap: 50px; padding: 0 50px 100px 50px; flex-wrap: wrap; max-width: 1500px; margin: 0 auto; }
+        .profile-image-box { flex: 1; min-width: 300px; max-width: 450px; }
+        .profile-image-box img { width: 100%; border-radius: 20px; box-shadow: 0 10px 30px rgba(255,255,255,0.05); object-fit: cover; }
+        .profile-info-box { flex: 2; min-width: 300px; }
+        .profile-info-box h2 { font-size: 2rem; border-bottom: 1px solid #333; padding-bottom: 10px; margin-top: 0; }
+        .profile-info-box h3 { color: #888; font-size: 1.2rem; margin-top: 30px; margin-bottom: 15px; }
+        .profile-info-box p { font-size: 1.1rem; line-height: 1.8; color: #ccc; margin: 8px 0; }
+        .profile-info-box strong { color: #fff; }
+
+        .skill-group { margin-bottom: 20px; }
+        .skill-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; font-weight: bold; }
+        .skill-title { display: flex; align-items: center; gap: 10px; }
+        .skill-logo { width: 24px; height: 24px; object-fit: contain; border-radius: 4px; }
+        .progress-bar-bg { width: 100%; height: 10px; background-color: #222; border-radius: 10px; overflow: hidden; }
+        .progress-fill { height: 100%; background: linear-gradient(90deg, #ff416c, #ff4b2b); border-radius: 10px; transition: width 1.5s ease-in-out; }
+        .contact-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; }
+        .contact-item { background: #111; padding: 15px 20px; border-radius: 10px; border: 1px solid #222; display: flex; align-items: center; gap: 10px; }
+
+        /* โค้ดสำหรับระบบ 3D Coverflow (ผลงานด้านใน) */
+        .project-group { padding: 0 !important; display: none; }
+        .project-group[style*="display: grid"] { display: block !important; }
+
+        .project-group .swiper { width: 100%; padding-top: 50px; padding-bottom: 100px; }
+        .project-group .swiper-slide {
+            width: auto !important;
+            height: 65vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: 0.3s;
+        }
+
+        .grid-item { 
+            position: relative; 
+            width: auto; 
+            height: 100%;
+            background: transparent !important; 
+            border-radius: 15px;
+            overflow: hidden; 
+            cursor: none; 
+            box-shadow: 0 20px 50px rgba(0,0,0,0.6);
+        }
+
+        .grid-item img, .grid-item video { width: auto; height: 100%; display: block; object-fit: cover; transition: transform 0.8s ease; }
+        .grid-item:hover img, .grid-item:hover video { transform: scale(1.03); }
+
+        .overlay { position: absolute; bottom: 0; left: 0; width: 100%; padding: 30px; background: linear-gradient(transparent, rgba(0,0,0,0.8)); box-sizing: border-box; opacity: 0; transform: translateY(20px); transition: all 0.4s ease; pointer-events: none; }
+        .grid-item:hover .overlay { opacity: 1; transform: translateY(0); }
+        .overlay h3 { margin: 0; font-size: 1.5rem; } 
+        .overlay p { margin: 5px 0 0 0; color: #ccc; font-size: 0.9rem; }
+
+        @media (max-width: 768px) {
+            .project-group .swiper-slide { height: 50vh; }
         }
     </style>
 </head>
 <body>
 
     <nav class="navbar">
-        <div class="logo">KUNANON.CH</div>
-        <div class="camera-pill-btn" id="hamburger-btn">
-            <div class="indicator"></div>
+        <div class="logo">PORTFOLIO</div>
+        <div class="hamburger" id="hamburger-btn">
+            <div class="line"></div>
+            <div class="line"></div>
+            <div class="line"></div>
         </div>
     </nav>
 
     <div class="nav-menu" id="nav-menu">
         <ul>
-            <li onclick="goToHome()">HOME</li>
+            <li class="menu-home" id="menu-home-btn">HOME (หน้าหลัก)</li>
             <li class="menu-link" data-title="ABOUT ME" data-target="profile-section" data-type="flex">PROFILE</li>
-            <li class="menu-link" data-title="YEAR 1" data-target="year1-projects" data-type="block">YEAR 1</li>
-            <li class="menu-link" data-title="YEAR 2" data-target="year2-projects" data-type="block">YEAR 2</li>
-            <li class="menu-link" data-title="YEAR 3" data-target="year3-projects" data-type="block">YEAR 3</li>
-            <li class="menu-link" data-title="YEAR 4" data-target="year4-projects" data-type="block">YEAR 4</li>
-            <li class="menu-link" data-title="ART WORK" data-target="favorite-projects" data-type="block">ART WORK</li>
+            <li class="menu-link" data-title="YEAR 1 PROJECTS" data-target="year1-projects" data-type="grid">YEAR 1</li>
+            <li class="menu-link" data-title="YEAR 2 PROJECTS" data-target="year2-projects" data-type="grid">YEAR 2</li>
+            <li class="menu-link" data-title="YEAR 3 PROJECTS" data-target="year3-projects" data-type="grid">YEAR 3</li>
+            <li class="menu-link" data-title="YEAR 4 PROJECTS" data-target="year4-projects" data-type="grid">YEAR 4</li>
+            <li class="menu-link" data-title="MY FAVORITE WORKS" data-target="favorite-projects" data-type="grid">ART WORK</li>
         </ul>
-    </div>
-
-    <div id="camera-ui">
-        <div class="scale-window">
-            <div class="scale-track" id="scale-track"></div>
-            <div class="center-mark"></div>
-        </div>
-        <div class="camera-number" id="camera-number">1 / 1</div>
     </div>
 
     <div class="cursor" id="custom-cursor"></div>
 
-    <main id="home-view" class="container fade-in">
+    <div id="home-view" class="container">
+        
         <div class="swiper homeSwiper">
             <div class="swiper-wrapper">
+                
                 <div class="swiper-slide home-slide" style="background-image: url('https://i.postimg.cc/cJDkBn2y/DSC005691.jpg');">
-                    <div class="content"><h2>PROFILE</h2><p>ประวัติและทักษะ</p><button class="open-folder" data-title="ABOUT ME" data-target="profile-section" data-type="flex">VIEW PROFILE</button></div>
+                    <div class="content">
+                        <div class="name">PROFILE</div>
+                        <div class="des">ข้อมูลส่วนตัว ประวัติการศึกษา<br>และทักษะความสามารถ</div>
+                        <button class="open-folder" data-title="ABOUT ME" data-target="profile-section" data-type="flex">ดูประวัติ</button>
+                    </div>
                 </div>
+
                 <div class="swiper-slide home-slide" style="background-image: url('https://i.postimg.cc/mgVWKhK2/Artboard-1.jpg');">
-                    <div class="content"><h2>YEAR 1</h2><p>ผลงานเริ่มต้น</p><button class="open-folder" data-title="YEAR 1" data-target="year1-projects" data-type="block">VIEW WORKS</button></div>
+                    <div class="content">
+                        <div class="name">YEAR 1</div>
+                        <div class="des">ผลงานชั้นปีที่ 1</div>
+                        <button class="open-folder" data-title="YEAR 1 PROJECTS" data-target="year1-projects" data-type="grid">ดูผลงาน</button>
+                    </div>
                 </div>
+                
                 <div class="swiper-slide home-slide" style="background-image: url('https://i.postimg.cc/L89rk25G/Artboard-2.jpg');">
-                    <div class="content"><h2>YEAR 2</h2><p>การพัฒนาฝีมือ</p><button class="open-folder" data-title="YEAR 2" data-target="year2-projects" data-type="block">VIEW WORKS</button></div>
+                    <div class="content">
+                        <div class="name">YEAR 2</div>
+                        <div class="des">ผลงานชั้นปีที่ 2</div>
+                        <button class="open-folder" data-title="YEAR 2 PROJECTS" data-target="year2-projects" data-type="grid">ดูผลงาน</button>
+                    </div>
                 </div>
+
                 <div class="swiper-slide home-slide" style="background-image: url('https://i.postimg.cc/Hn0h5hgp/Artboard-3.jpg');">
-                    <div class="content"><h2>YEAR 3</h2><p>ผลงานปัจจุบัน</p><button class="open-folder" data-title="YEAR 3" data-target="year3-projects" data-type="block">VIEW WORKS</button></div>
+                    <div class="content">
+                        <div class="name">YEAR 3</div>
+                        <div class="des">ผลงานชั้นปีที่ 3</div>
+                        <button class="open-folder" data-title="YEAR 3 PROJECTS" data-target="year3-projects" data-type="grid">ดูผลงาน</button>
+                    </div>
                 </div>
+
                 <div class="swiper-slide home-slide" style="background-image: url('https://i.postimg.cc/Qddy9mYz/Artboard-4.jpg');">
-                    <div class="content"><h2>YEAR 4</h2><p>โปรเจกต์จบการศึกษา</p><button class="open-folder" data-title="YEAR 4" data-target="year4-projects" data-type="block">VIEW WORKS</button></div>
+                    <div class="content">
+                        <div class="name">YEAR 4</div>
+                        <div class="des">ผลงานชั้นปีที่ 4</div>
+                        <button class="open-folder" data-title="YEAR 4 PROJECTS" data-target="year4-projects" data-type="grid">ดูผลงาน</button>
+                    </div>
                 </div>
+
                 <div class="swiper-slide home-slide" style="background-image: url('https://i.postimg.cc/5t4njWbX/Comp-5.gif');">
-                    <div class="content"><h2>ART WORK</h2><p>ความชอบส่วนตัว</p><button class="open-folder" data-title="ART WORK" data-target="favorite-projects" data-type="block">VIEW ART</button></div>
+                    <div class="content">
+                        <div class="name">ART WORK</div>
+                        <div class="des">ผลงานส่วนตัว</div>
+                        <button class="open-folder" data-title="MY FAVORITE WORKS" data-target="favorite-projects" data-type="grid">ดูผลงาน</button>
+                    </div>
                 </div>
+
             </div>
         </div>
-    </main>
+        
+        <div class="controls">
+            <button id="home-prev">❮</button>
+            <button id="home-next">❯</button>
+        </div>
+    </div>
 
-    <div id="detail-view">
+    <div id="detail-view" style="display: none;">
         <div class="detail-header">
-            <button id="back-btn" onclick="goToHome()">← BACK TO HOME</button>
+            <button id="back-btn">← BACK TO FOLDERS</button>
             <h1 id="detail-title">PROJECTS</h1>
         </div>
-
-        <section id="profile-section" class="view-group profile-container">
-            <div class="profile-image-box"><img src="https://i.postimg.cc/6qVQDtdG/DSC00569.jpg" alt="Profile"></div>
+        
+        <div id="profile-section" class="view-group profile-container" style="display: none;">
+            <div class="profile-image-box">
+                <img src="https://i.postimg.cc/6qVQDtdG/DSC00569.jpg" alt="Boat Khunanon">
+            </div>
             <div class="profile-info-box">
-                <h2>Kunanon Chaisamart (Boat)</h2>
-                <p>นักศึกษาชั้นปีที่ 3 สาขาดิจิทัลอาร์ต มีความหลงใหลในการทำ 2D Motion และ Idle Loop Animation พร้อมที่จะเรียนรู้และพัฒนาสิ่งใหม่ๆ อยู่เสมอ</p>
-                
-                <h3>My Skills</h3>
-                <div class="skill-item">
-                    <div class="skill-header"><img src="https://i.postimg.cc/9fBJF7Cs/images.png" class="skill-logo"> After Effects</div>
+                <h2>Profile</h2>
+                <p>ชื่อนาย คุณานนต์ ไชยสามารถ ชื่อเล่น โบ๊ท เกิดวันที่ 8 สิงหาคม 2546 อายุ 22 ปี เป็นนักศึกษาชั้นปีที่ 3 สาขาดิจิทัลอาร์ต คณะมนุษยศาสตร์และสังคมศาสตร์</p>
+                <p>มีความสนใจด้านผลงานดิจิทัลเเละชื่นชอบการทำภาพนิ่งให้ดูมีชีวิตสไตล์งานที่ชอบคือ 2D idle loop Animation การเคลื่อนไหวเเบบจำกัดเเละพร้อมพัฒนาความคิดสร้างสรรค์มาโดยตลอด</p>
+                <p>My name is Kunanon Chaisamart, nicknamed Boat. I was born on August 8, 2003, and I am 22 years old. I am a third-year student majoring in Digital Art at the Faculty of Humanities and Social Sciences.</p>
+                <p>I am interested in digital art and enjoy bringing still images to life. My preferred style is 2D idle loop animation (limited movement), and I am always ready to develop my creativity.</p>
+
+                <h3>Education</h3>
+                <p><strong>2562 :</strong> โรงเรียนเลยอนุกูลวิทยา</p>
+                <p><strong>2566 - ปัจจุบัน:</strong> มหาวิทยาลัยราชภัฏเลย</p>
+
+                <h3>Skills</h3>
+                <div class="skill-group">
+                    <div class="skill-header">
+                        <span class="skill-title">
+                            <img src="https://i.postimg.cc/9fBJF7Cs/images.png" alt="AE Logo" class="skill-logo">
+                            After Effects
+                        </span>
+                        <span>90%</span>
+                    </div>
                     <div class="progress-bar-bg"><div class="progress-fill" style="width: 90%;"></div></div>
                 </div>
-                <div class="skill-item">
-                    <div class="skill-header"><img src="https://i.postimg.cc/KcppMBLs/Adobe-Photoshop-CC-icon-svg.png" class="skill-logo"> Photoshop</div>
+                
+                <div class="skill-group">
+                    <div class="skill-header">
+                        <span class="skill-title">
+                            <img src="https://i.postimg.cc/KcppMBLs/Adobe-Photoshop-CC-icon-svg.png" alt="PS Logo" class="skill-logo">
+                            Photoshop
+                        </span>
+                        <span>95%</span>
+                    </div>
                     <div class="progress-bar-bg"><div class="progress-fill" style="width: 95%;"></div></div>
+                </div>
+                <div class="skill-group">
+                    <div class="skill-header">
+                        <span class="skill-title">
+                            <img src="https://i.postimg.cc/zfT8DWDH/images-(1).png" alt="Ai Logo" class="skill-logo">
+                            Illustrator
+                        </span>
+                        <span>60%</span>
+                    </div>
+                    <div class="progress-bar-bg"><div class="progress-fill" style="width: 60%;"></div></div>
                 </div>
 
                 <h3>Contact</h3>
-                <p>📧 chaisamartk@gmail.com | 📞 080-723-7949</p>
+                <div class="contact-grid">
+                    <div class="contact-item"><strong>Phone:</strong> 080-723-7949</div>
+                    <div class="contact-item"><strong>Gmail:</strong> chaisamartk@gmail.com</div>
+                    <div class="contact-item"><strong>Instagram:</strong> Knn.mt_</div>
+                    <div class="contact-item"><strong>Facebook:</strong> Kunanon Chaisamart</div>
+                    <div class="contact-item"><strong>Line:</strong> temboren</div>
+                    <div class="contact-item"><strong>TikTok:</strong> Qunnerla</div>
+                </div>
             </div>
-        </section>
+        </div>
 
-        <section id="year1-projects" class="view-group project-group">
-            <div class="grid-item"><img src="https://i.postimg.cc/gjZpxZmZ/IMG-3874.jpg"></div>
-            <div class="grid-item"><img src="https://i.postimg.cc/tgv7PFQ6/IMG-3875.jpg"></div>
-            <div class="grid-item"><img src="https://i.postimg.cc/HxCk1m5m/IMG-3876.jpg"></div>
-        </section>
+        <div id="year1-projects" class="view-group project-group" style="display: none;">
+            <div class="grid-item">
+                <img src="https://i.postimg.cc/gjZpxZmZ/IMG-3874.jpg" alt="Work">
+                <div class="overlay"><h3>รายวิชาวาดเส้นเพื่องานดิจิทัลอาร์ต</h3><p>ศาสตราจารย์ ธีระพงษ์ พิทักษ์ศฤงคาร</p></div>
+            </div>
+            <div class="grid-item">
+                <img src="https://i.postimg.cc/tgv7PFQ6/IMG-3875.jpg" alt="Work">
+                <div class="overlay"><h3>รายวิชาวาดเส้นเพื่องานดิจิทัลอาร์ต</h3><p>ศาสตราจารย์ ธีระพงษ์ พิทักษ์ศฤงคาร</p></div>
+            </div>
+            <div class="grid-item">
+                <img src="https://i.postimg.cc/HxCk1m5m/IMG-3876.jpg" alt="Work">
+                <div class="overlay"><h3>รายวิชาวาดเส้นเพื่องานดิจิทัลอาร์ต</h3><p>ศาสตราจารย์ ธีระพงษ์ พิทักษ์ศฤงคาร</p></div>
+            </div>
+            <div class="grid-item">
+                <img src="https://i.postimg.cc/QxS9gF7k/IMG-3878.jpg" alt="Work">
+                <div class="overlay"><h3>รายวิชาวาดเส้นเพื่องานดิจิทัลอาร์ต</h3><p>ศาสตราจารย์ ธีระพงษ์ พิทักษ์ศฤงคาร</p></div>
+            </div>
+            <div class="grid-item">
+                <img src="https://i.postimg.cc/SRF8PHQL/IMG-3877.jpg" alt="Work">
+                <div class="overlay"><h3>รายวิชาวาดเส้นเพื่องานดิจิทัลอาร์ต</h3><p>ศาสตราจารย์ ธีระพงษ์ พิทักษ์ศฤงคาร</p></div>
+            </div>
+        </div>
 
-        <section id="year2-projects" class="view-group project-group">
-            <div class="grid-item"><img src="https://i.postimg.cc/j2Tz3Bvz/AMBIGUOUS-FG02.jpg"></div>
-            <div class="grid-item"><img src="https://i.postimg.cc/2yLPTbct/STABLE-FG01.jpg"></div>
-            <div class="grid-item"><img src="https://i.postimg.cc/X7bbxxWr/Similarity-Stairs.jpg"></div>
-        </section>
+        <div id="year2-projects" class="view-group project-group" style="display: none;">
+            <div class="grid-item"><img src="https://i.postimg.cc/j2Tz3Bvz/AMBIGUOUS-FG02.jpg" alt="Work"><div class="overlay"><h3>รายวิชาการสร้างสรรค์ตัวอักษร</h3><p>ผู้ช่วยศาสตราจารย์ ดร.อิสริยาภรณ์ ชัยกุหลาบ</p></div></div>
+            <div class="grid-item"><img src="https://i.postimg.cc/2yLPTbct/STABLE-FG01.jpg" alt="Work"><div class="overlay"><h3>รายวิชาการสร้างสรรค์ตัวอักษร</h3><p>ผู้ช่วยศาสตราจารย์ ดร.อิสริยาภรณ์ ชัยกุหลาบ</p></div></div>
+            <div class="grid-item"><img src="https://i.postimg.cc/X7bbxxWr/Similarity-Stairs.jpg" alt="Work"><div class="overlay"><h3>รายวิชาการสร้างสรรค์ตัวอักษร</h3><p>ผู้ช่วยศาสตราจารย์ ดร.อิสริยาภรณ์ ชัยกุหลาบ</p></div></div>
+            <div class="grid-item"><img src="https://i.postimg.cc/fy716ns3/Continuity-Dream.jpg" alt="Work"><div class="overlay"><h3>รายวิชาการสร้างสรรค์ตัวอักษร</h3><p>ผู้ช่วยศาสตราจารย์ ดร.อิสริยาภรณ์ ชัยกุหลาบ</p></div></div>
+            <div class="grid-item"><img src="https://i.postimg.cc/Jh9g044G/2-Letters-plus-image.jpg" alt="Work"><div class="overlay"><h3>รายวิชาการสร้างสรรค์ตัวอักษร</h3><p>ผู้ช่วยศาสตราจารย์ ดร.อิสริยาภรณ์ ชัยกุหลาบ</p></div></div>
+            <div class="grid-item"><img src="https://i.postimg.cc/FKJWM5b2/3-Types-as-3D.jpg" alt="Work"><div class="overlay"><h3>รายวิชาการสร้างสรรค์ตัวอักษร</h3><p>ผู้ช่วยศาสตราจารย์ ดร.อิสริยาภรณ์ ชัยกุหลาบ</p></div></div>
+            <div class="grid-item"><img src="https://i.postimg.cc/MT7sG7Fr/Common-region-Slimz.jpg" alt="Work"><div class="overlay"><h3>รายวิชาการสร้างสรรค์ตัวอักษร</h3><p>ผู้ช่วยศาสตราจารย์ ดร.อิสริยาภรณ์ ชัยกุหลาบ</p></div></div>
+            <div class="grid-item"><img src="https://i.postimg.cc/25Fvb0C9/IMG-3864.jpg" alt="Work"><div class="overlay"><h3>รายวิชาการสร้างสรรค์ตัวอักษร</h3><p>ผู้ช่วยศาสตราจารย์ ดร.อิสริยาภรณ์ ชัยกุหลาบ</p></div></div>
+            <div class="grid-item"><img src="https://i.postimg.cc/Kz8KKFqy/1.jpg" alt="Work"><div class="overlay"><h3>รายวิชาการสร้างสรรค์ตัวอักษร</h3><p>ผู้ช่วยศาสตราจารย์ ดร.อิสริยาภรณ์ ชัยกุหลาบ</p></div></div>
+            <div class="grid-item"><img src="https://i.postimg.cc/BQkwMnHz/14.jpg" alt="Work"><div class="overlay"><h3>รายวิชาการสร้างสรรค์ตัวอักษร</h3><p>ผู้ช่วยศาสตราจารย์ ดร.อิสริยาภรณ์ ชัยกุหลาบ</p></div></div>
+            <div class="grid-item"><img src="https://i.postimg.cc/KvRHPMk8/2.jpg" alt="Work"><div class="overlay"><h3>รายวิชาการสร้างสรรค์ตัวอักษร</h3><p>ผู้ช่วยศาสตราจารย์ ดร.อิสริยาภรณ์ ชัยกุหลาบ</p></div></div>
+            <div class="grid-item"><img src="https://i.postimg.cc/pLKkCY2p/3.jpg" alt="Work"><div class="overlay"><h3>รายวิชาการสร้างสรรค์ตัวอักษร</h3><p>ผู้ช่วยศาสตราจารย์ ดร.อิสริยาภรณ์ ชัยกุหลาบ</p></div></div>
+            <div class="grid-item"><img src="https://i.postimg.cc/9f8xwXm9/4.jpg" alt="Work"><div class="overlay"><h3>รายวิชาการสร้างสรรค์ตัวอักษร</h3><p>ผู้ช่วยศาสตราจารย์ ดร.อิสริยาภรณ์ ชัยกุหลาบ</p></div></div>
+            <div class="grid-item"><img src="https://i.postimg.cc/JnspNwt7/5.jpg" alt="Work"><div class="overlay"><h3>รายวิชาการสร้างสรรค์ตัวอักษร</h3><p>ผู้ช่วยศาสตราจารย์ ดร.อิสริยาภรณ์ ชัยกุหลาบ</p></div></div>
+            <div class="grid-item"><img src="https://i.postimg.cc/P5tsmxHT/TEE-YOD-1-FINAL-REMAKE.jpg" alt="Work"><div class="overlay"><h3>รายวิชาการออกเเบบสื่อสิ่งพิมพ์โฆษณา</h3><p>ผู้ช่วยศาสตราจารย์ ดร.อิสริยาภรณ์ ชัยกุหลาบ</p></div></div>
+            <div class="grid-item"><img src="https://i.postimg.cc/3xnM9Trw/TEE-YOD-2-FINAL-REMAK.jpg" alt="Work"><div class="overlay"><h3>รายวิชาการออกเเบบสื่อสิ่งพิมพ์โฆษณา</h3><p>ผู้ช่วยศาสตราจารย์ ดร.อิสริยาภรณ์ ชัยกุหลาบ</p></div></div>
+            <div class="grid-item"><img src="https://i.postimg.cc/ZKS1SRCZ/THE-MEDIUM-REMAK.jpg" alt="Work"><div class="overlay"><h3>รายวิชาการออกเเบบสื่อสิ่งพิมพ์โฆษณา</h3><p>ผู้ช่วยศาสตราจารย์ ดร.อิสริยาภรณ์ ชัยกุหลาบ</p></div></div>
+            <div class="grid-item"><img src="https://i.postimg.cc/HnV18P1n/devil-bird.jpg" alt="Work"><div class="overlay"><h3>รายวิชาวาดเส้นสร้างสรรค์ </h3><p>ศาสตราจารย์ ธีระพงษ์ พิทักษ์ศฤงคาร</p></div></div>
+            <div class="grid-item"><img src="https://i.postimg.cc/dtZKqXBP/Peacefull-hills.jpg" alt="Work"><div class="overlay"><h3>รายวิชาวาดเส้นสร้างสรรค์</h3><p>ศาสตราจารย์ ธีระพงษ์ พิทักษ์ศฤงคาร</p></div></div>
+            <div class="grid-item"><img src="https://i.postimg.cc/TwTDxnMb/PEETAKON.jpg" alt="Work"><div class="overlay"><h3>รายวิชาวาดภาพคาเเรคเตอร์ฯ</h3><p>ศาสตราจารย์ ชัยทวี บุบผา</p></div></div>
+            <div class="grid-item"><img src="https://i.postimg.cc/cJFsK3t9/Mermaid.jpg" alt="Work"><div class="overlay"><h3>รายวิชาวาดภาพคาเเรคเตอร์ฯ</h3><p>ศาสตราจารย์ ชัยทวี บุบผา</p></div></div>
+            <div class="grid-item"><img src="https://i.postimg.cc/GhnHnkFT/IMG-5527.jpg" alt="Work"><div class="overlay"><h3>รายวิชาวาดภาพคาเเรคเตอร์ฯ</h3><p>ศาสตราจารย์ ชัยทวี บุบผา</p></div></div>
+            <div class="grid-item"><img src="https://i.postimg.cc/pdrdJkHw/eagle.jpg" alt="Work"><div class="overlay"><h3>รายวิชาวาดภาพคาเเรคเตอร์ฯ</h3><p>ศาสตราจารย์ ชัยทวี บุบผา</p></div></div>
+        </div>
 
-        <section id="favorite-projects" class="view-group project-group">
-            <div class="grid-item"><video autoplay loop muted playsinline><source src="Airi-Witching-Hour.mp4"></video></div>
-            <div class="grid-item"><video autoplay loop muted playsinline><source src="Aya-Cinnamoroll-Dream.mp4"></video></div>
-        </section>
+        <div id="year3-projects" class="view-group project-group" style="display: none;">
+            <div class="grid-item"><img src="https://i.postimg.cc/Cx3MT8nC/7.jpg" alt="Work"><div class="overlay"><h3>รายวิชาการสร้างสรรค์กราฟิกบรรจุภัณฑ์</h3><p>ผู้ช่วยศาสตราจารย์ ดร.อิสริยาภรณ์ ชัยกุหลาบ</p></div></div>
+            <div class="grid-item"><img src="https://i.postimg.cc/rwxX4Pzr/8.jpg" alt="Work"><div class="overlay"><h3>รายวิชาการสร้างสรรค์กราฟิกบรรจุภัณฑ์</h3><p>ผู้ช่วยศาสตราจารย์ ดร.อิสริยาภรณ์ ชัยกุหลาบ</p></div></div>
+            <div class="grid-item"><img src="https://i.postimg.cc/wxmSZrQt/9.jpg" alt="Work"><div class="overlay"><h3>รายวิชาการสร้างสรรค์กราฟิกบรรจุภัณฑ์</h3><p>ผู้ช่วยศาสตราจารย์ ดร.อิสริยาภรณ์ ชัยกุหลาบ</p></div></div>
+            <div class="grid-item"><img src="https://i.postimg.cc/ZKPXKygb/10.jpg" alt="Work"><div class="overlay"><h3>รายวิชาการสร้างสรรค์กราฟิกบรรจุภัณฑ์</h3><p>ผู้ช่วยศาสตราจารย์ ดร.อิสริยาภรณ์ ชัยกุหลาบ</p></div></div>
+            <div class="grid-item"><img src="https://i.postimg.cc/W1gz4SVz/sanea-khxng-w-d-phra-that-sr-sxngr-k.jpg" alt="Work"><div class="overlay"><h3>รายวิชาการถ่ายภาพดิจิทัลเเละการตกเเต่งภาพ</h3><p>ผู้ช่วยศาสตราจารย์ ศรัณยพัชร์ จิตพิไล</p></div></div>
+            <div class="grid-item"><img src="https://i.postimg.cc/rs5ypw6Y/r-p-pra-thrrm.jpg" alt="Work"><div class="overlay"><h3>รายวิชาการถ่ายภาพดิจิทัลเเละการตกเเต่งภาพ</h3><p>ผู้ช่วยศาสตราจารย์ ศรัณยพัชร์ จิตพิไล</p></div></div>
+            <div class="grid-item"><img src="https://i.postimg.cc/65YJfvhL/namthrrm.jpg" alt="Work"><div class="overlay"><h3>รายวิชาการถ่ายภาพดิจิทัลเเละการตกเเต่งภาพ</h3><p>ผู้ช่วยศาสตราจารย์ ศรัณยพัชร์ จิตพิไล</p></div></div>
+            <div class="grid-item"><img src="https://i.postimg.cc/1tcYRkCf/IMG-2885.jpg" alt="Work"><div class="overlay"><h3>รายวิชาการถ่ายภาพดิจิทัลเเละการตกเเต่งภาพ</h3><p>ผู้ช่วยศาสตราจารย์ ศรัณยพัชร์ จิตพิไล</p></div></div>
+            <div class="grid-item"><img src="https://i.postimg.cc/8PnXCBHn/IMG-2889.jpg" alt="Work"><div class="overlay"><h3>รายวิชาการถ่ายภาพดิจิทัลเเละการตกเเต่งภาพ</h3><p>ผู้ช่วยศาสตราจารย์ ศรัณยพัชร์ จิตพิไล</p></div></div>
+            <div class="grid-item"><img src="https://i.postimg.cc/6pkHrWFy/IMG-2890.jpg" alt="Work"><div class="overlay"><h3>รายวิชาการถ่ายภาพดิจิทัลเเละการตกเเต่งภาพ</h3><p>ผู้ช่วยศาสตราจารย์ ศรัณยพัชร์ จิตพิไล</p></div></div>
+            <div class="grid-item"><img src="https://i.postimg.cc/N0Rdphct/IMG-2891.jpg" alt="Work"><div class="overlay"><h3>รายวิชาการถ่ายภาพดิจิทัลเเละการตกเเต่งภาพ</h3><p>ผู้ช่วยศาสตราจารย์ ศรัณยพัชร์ จิตพิไล</p></div></div>
+            <div class="grid-item"><img src="https://i.postimg.cc/ydPvCFxX/IMG-2892.jpg" alt="Work"><div class="overlay"><h3>รายวิชาการถ่ายภาพดิจิทัลเเละการตกเเต่งภาพ</h3><p>ผู้ช่วยศาสตราจารย์ ศรัณยพัชร์ จิตพิไล</p></div></div>
+            <div class="grid-item"><img src="https://i.postimg.cc/x8p5cnKN/IMG-2893.jpg" alt="Work"><div class="overlay"><h3>รายวิชาการถ่ายภาพดิจิทัลเเละการตกเเต่งภาพ</h3><p>ผู้ช่วยศาสตราจารย์ ศรัณยพัชร์ จิตพิไล</p></div></div>
+            <div class="grid-item"><img src="https://i.postimg.cc/g0B3VNx4/High-End-Fashion-Magazines.jpg" alt="Work"><div class="overlay"><h3>รายวิชาการสร้างสรรค์อัตลักษณ์ตราสินค้า</h3><p>ผู้ช่วยศาสตราจารย์ ดร.อิสริยาภรณ์ ชัยกุหลาบ</p></div></div>
+            <div class="grid-item"><img src="https://i.postimg.cc/7LpfPcGJ/CATALOG.jpg" alt="Work"><div class="overlay"><h3>รายวิชาการสร้างสรรค์อัตลักษณ์ตราสินค้า</h3><p>ผู้ช่วยศาสตราจารย์ ดร.อิสริยาภรณ์ ชัยกุหลาบ</p></div></div>
+            <div class="grid-item"><img src="https://i.postimg.cc/90cXrjWQ/Poster-Hig-H-END.jpg" alt="Work"><div class="overlay"><h3>รายวิชาการสร้างสรรค์อัตลักษณ์ตราสินค้า</h3><p>ผู้ช่วยศาสตราจารย์ ดร.อิสริยาภรณ์ ชัยกุหลาบ</p></div></div>
+            <div class="grid-item"><img src="https://i.postimg.cc/MZYKgXDf/Interactive-Billboards.jpg" alt="Work"><div class="overlay"><h3>รายวิชาการสร้างสรรค์อัตลักษณ์ตราสินค้า</h3><p>ผู้ช่วยศาสตราจารย์ ดร.อิสริยาภรณ์ ชัยกุหลาบ</p></div></div>
+            <div class="grid-item"><img src="https://i.postimg.cc/prj7bmw7/Vector.jpg" alt="Work"><div class="overlay"><h3>รายวิชาการสร้างสรรค์อัตลักษณ์ตราสินค้า</h3><p>ผู้ช่วยศาสตราจารย์ ดร.อิสริยาภรณ์ ชัยกุหลาบ</p></div></div>
+            <div class="grid-item"><img src="https://i.postimg.cc/NfhS8xTv/logo.png" alt="Work"><div class="overlay"><h3>รายวิชาการสร้างสรรค์อัตลักษณ์ตราสินค้า</h3><p>ผู้ช่วยศาสตราจารย์ ดร.อิสริยาภรณ์ ชัยกุหลาบ</p></div></div>
+            <div class="grid-item"><img src="https://i.postimg.cc/8cdHmLQM/Artboard-2.jpg" alt="Work"><div class="overlay"><h3>รายวิชาการสร้างสรรค์อัตลักษณ์ตราสินค้า</h3><p>ผู้ช่วยศาสตราจารย์ ดร.อิสริยาภรณ์ ชัยกุหลาบ</p></div></div>
+            <div class="grid-item"><img src="https://i.postimg.cc/ZKZjKspv/Artboard-3.jpg" alt="Work"><div class="overlay"><h3>รายวิชาการสร้างสรรค์อัตลักษณ์ตราสินค้า</h3><p>ผู้ช่วยศาสตราจารย์ ดร.อิสริยาภรณ์ ชัยกุหลาบ</p></div></div>
+            <div class="grid-item"><img src="https://i.postimg.cc/sggc5Bnj/Artboard-4.jpg" alt="Work"><div class="overlay"><h3>รายวิชาการสร้างสรรค์อัตลักษณ์ตราสินค้า</h3><p>ผู้ช่วยศาสตราจารย์ ดร.อิสริยาภรณ์ ชัยกุหลาบ</p></div></div>
+            <div class="grid-item"><img src="https://i.postimg.cc/vm1tSJwM/Artboard-1.jpg" alt="Work"><div class="overlay"><h3>รายวิชาการสร้างสรรค์อัตลักษณ์ตราสินค้า</h3><p>ผู้ช่วยศาสตราจารย์ ดร.อิสริยาภรณ์ ชัยกุหลาบ</p></div></div>
+            <div class="grid-item"><img src="https://i.postimg.cc/6QDfsMBC/Artboard-5.jpg" alt="Work"><div class="overlay"><h3>รายวิชาการสร้างสรรค์อัตลักษณ์ตราสินค้า</h3><p>ผู้ช่วยศาสตราจารย์ ดร.อิสริยาภรณ์ ชัยกุหลาบ</p></div></div>
+            <div class="grid-item"><img src="https://i.postimg.cc/1zpftBpG/w-d-cxm-mn.jpg" alt="Work"><div class="overlay"><h3>รายวิชาเทคนิคการตัดต่อภาพยนตร์ด้วยระบบดิจิทัล</h3><p>ผู้ช่วยศาสตราจารย์ ศรัณยพัชร์ จิตพิไล</p></div></div>
+            <div class="grid-item"><img src="https://i.postimg.cc/C175CKry/w-dp-a-pra-cha-srr-kh.jpg" alt="Work"><div class="overlay"><h3>รายวิชาเทคนิคการตัดต่อภาพยนตร์ด้วยระบบดิจิทัล</h3><p>ผู้ช่วยศาสตราจารย์ ศรัณยพัชร์ จิตพิไล</p></div></div>
+            <div class="grid-item"><img src="https://i.postimg.cc/tJmgfMjG/w-dw-ngsaph-ngph-t'h-na-ram.jpg" alt="Work"><div class="overlay"><h3>รายวิชาเทคนิคการตัดต่อภาพยนตร์ด้วยระบบดิจิทัล</h3><p>ผู้ช่วยศาสตราจารย์ ศรัณยพัชร์ จิตพิไล</p></div></div>
+            <div class="grid-item"><img src="https://i.postimg.cc/rF3mN3j0/w-dsr-chmch-n.jpg" alt="Work"><div class="overlay"><h3>รายวิชาเทคนิคการตัดต่อภาพยนตร์ด้วยระบบดิจิทัล</h3><p>ผู้ช่วยศาสตราจารย์ ศรัณยพัชร์ จิตพิไล</p></div></div>
+        </div>
+
+        <div id="year4-projects" class="view-group project-group" style="display: none;">
+            <div class="grid-item">
+                <img src="https://i.postimg.cc/Qddy9mYz/Artboard-4.jpg" alt="Coming Soon">
+                <div class="overlay"><h3>Coming Soon</h3><p>Year 4 Projects</p></div>
+            </div>
+        </div>
+
+        <div id="favorite-projects" class="view-group project-group" style="display: none;">
+            <div class="grid-item"><video autoplay loop muted playsinline><source src="Airi-Witching-Hour.mp4" type="video/mp4"></video><div class="overlay"><h3>Airi Witching Hour</h3><p>LIVE 2D ANIMATION</p></div></div>
+            <div class="grid-item"><video autoplay loop muted playsinline><source src="Aya-Cinnamoroll-Dream.mp4" type="video/mp4"></video><div class="overlay"><h3>Aya Cinnamoroll</h3><p>LIVE 2D ANIMATION</p></div></div>
+            <div class="grid-item"><video autoplay loop muted playsinline><source src="Diao-chan-Elemental-Divinity.mp4" type="video/mp4"></video><div class="overlay"><h3>Diao Chan Elemental</h3><p>LIVE 2D ANIMATION</p></div></div>
+            <div class="grid-item"><video autoplay loop muted playsinline><source src="Hayate-Kid-the-Phantom.mp4" type="video/mp4"></video><div class="overlay"><h3>Hayate Kid the Phantom</h3><p>LIVE 2D ANIMATION</p></div></div>
+            <div class="grid-item"><video autoplay loop muted playsinline><source src="Iggy-Rimuru-Tempest.mp4" type="video/mp4"></video><div class="overlay"><h3>Iggy Rimuru Tempest</h3><p>LIVE 2D ANIMATION</p></div></div>
+            <div class="grid-item"><video autoplay loop muted playsinline><source src="Liliana-Witching-Hour.mp4" type="video/mp4"></video><div class="overlay"><h3>Liliana Witching Hour</h3><p>LIVE 2D ANIMATION</p></div></div>
+            <div class="grid-item"><video autoplay loop muted playsinline><source src="Murad-Moon-Chuser.mp4" type="video/mp4"></video><div class="overlay"><h3>Murad Moon Chuser</h3><p>LIVE 2D ANIMATION</p></div></div>
+            <div class="grid-item"><video autoplay loop muted playsinline><source src="Nakroth-Stellar-Troupe.mp4" type="video/mp4"></video><div class="overlay"><h3>Nakroth Stellar Troupe</h3><p>LIVE 2D ANIMATION</p></div></div>
+            <div class="grid-item"><video autoplay loop muted playsinline><source src="Natalya-Kuromi-Heart.mp4" type="video/mp4"></video><div class="overlay"><h3>Natalya Kuromi Heart</h3><p>LIVE 2D ANIMATION</p></div></div>
+        </div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+
     <script>
-        // 1. Setup Camera Scale Ticks
-        const scaleTrack = document.getElementById('scale-track');
-        for(let i=0; i<40; i++) {
-            const tick = document.createElement('div');
-            tick.className = i % 5 === 0 ? 'scale-tick major' : 'scale-tick';
-            scaleTrack.appendChild(tick);
-        }
-
-        let currentActiveSwiper = null;
-        const tickStep = 18;
-
-        function updateCameraUI(swiper) {
-            if(!swiper) return;
-            document.getElementById('camera-number').innerText = `${swiper.activeIndex + 1} / ${swiper.slides.length}`;
-            scaleTrack.style.transform = `translateX(${-swiper.activeIndex * tickStep}px)`;
-        }
-
-        // 2. Initialize Main Home Swiper
+        // --- 1. ระบบ 3D Coverflow หน้าหลัก (Home) ---
         const homeSwiper = new Swiper(".homeSwiper", {
-            effect: "coverflow", centeredSlides: true, slidesPerView: "auto",
-            coverflowEffect: { rotate: 20, stretch: 0, depth: 250, modifier: 1, slideShadows: true },
+            effect: "coverflow",
+            grabCursor: true,
+            centeredSlides: true,
+            slidesPerView: "auto",
+            initialSlide: 1, // เริ่มที่แฟ้ม Year 1
+            coverflowEffect: {
+                rotate: 20, // หมุนนิดๆ กำลังเท่
+                stretch: 0,
+                depth: 250,
+                modifier: 1,
+                slideShadows: true,
+            },
+            keyboard: { enabled: true },
             mousewheel: true,
-            on: { init: function() { updateCameraUI(this); }, slideChange: function() { updateCameraUI(this); } }
+            navigation: {
+                nextEl: '#home-next',
+                prevEl: '#home-prev',
+            }
         });
-        currentActiveSwiper = homeSwiper;
 
-        // 3. Navigation & Page Switching
-        const navMenu = document.getElementById('nav-menu');
+        // --- 2. ระบบเมนู 3 ขีด (Hamburger) ---
         const hamburgerBtn = document.getElementById('hamburger-btn');
-        const cameraUI = document.getElementById('camera-ui');
-        const customCursor = document.getElementById('custom-cursor');
-
+        const navMenu = document.getElementById('nav-menu');
         function toggleMenu() {
             hamburgerBtn.classList.toggle('active');
             navMenu.classList.toggle('active');
         }
         hamburgerBtn.addEventListener('click', toggleMenu);
 
-        function goToHome() {
-            document.getElementById('home-view').style.display = 'flex';
-            document.getElementById('detail-view').style.display = 'none';
-            cameraUI.style.display = 'flex';
-            customCursor.style.display = 'none';
-            currentActiveSwiper = homeSwiper;
-            updateCameraUI(homeSwiper);
-            if(navMenu.classList.contains('active')) toggleMenu();
+        // --- 3. ระบบเปลี่ยนหน้าและการเรียกวงล้อผลงานด้านใน ---
+        const homeView = document.getElementById('home-view');
+        const detailView = document.getElementById('detail-view');
+        const backBtn = document.getElementById('back-btn');
+        const detailTitle = document.getElementById('detail-title');
+        const customCursor = document.getElementById('custom-cursor');
+
+        function initInnerSwiper() {
+            document.querySelectorAll('.project-group').forEach((group, index) => {
+                if (group.querySelector('.swiper')) return; // สร้างแล้วไม่ต้องทำซ้ำ
+
+                const swiperContainer = document.createElement('div');
+                swiperContainer.className = `swiper myInnerSwiper-${index}`;
+                
+                const swiperWrapper = document.createElement('div');
+                swiperWrapper.className = 'swiper-wrapper';
+
+                const items = Array.from(group.querySelectorAll('.grid-item'));
+                items.forEach(item => {
+                    item.classList.add('swiper-slide');
+                    swiperWrapper.appendChild(item);
+                });
+
+                swiperContainer.appendChild(swiperWrapper);
+                group.appendChild(swiperContainer);
+
+                new Swiper(`.myInnerSwiper-${index}`, {
+                    effect: "coverflow",
+                    grabCursor: true,
+                    centeredSlides: true,
+                    slidesPerView: "auto",
+                    coverflowEffect: {
+                        rotate: 35,
+                        stretch: 0,
+                        depth: 350,
+                        modifier: 1,
+                        slideShadows: true,
+                    },
+                    keyboard: { enabled: true },
+                    mousewheel: true,
+                    observer: true, 
+                    observeParents: true,
+                });
+            });
         }
 
-        let innerSwipers = {};
-        document.querySelectorAll('.open-folder, .menu-link').forEach(btn => {
-            btn.addEventListener('click', function() {
-                const targetId = this.dataset.target;
-                const type = this.dataset.type;
-                const title = this.dataset.title;
+        document.querySelectorAll('.open-folder, .menu-link').forEach(button => {
+            button.addEventListener('click', function() {
+                if (navMenu.classList.contains('active')) toggleMenu();
 
-                document.getElementById('home-view').style.display = 'none';
-                document.getElementById('detail-view').style.display = 'block';
-                document.getElementById('detail-title').innerText = title;
+                detailTitle.innerText = this.getAttribute('data-title');
+                
+                document.querySelectorAll('.view-group').forEach(group => {
+                    group.style.display = 'none';
+                });
 
-                // Hide all groups first
-                document.querySelectorAll('.view-group').forEach(g => g.style.display = 'none');
-                const targetGroup = document.getElementById(targetId);
-                targetGroup.style.display = type;
-
-                // 🔴 LOGIC: Camera UI Visibility
-                if(targetId === 'profile-section') {
-                    cameraUI.style.display = 'none';
-                    customCursor.style.display = 'none';
-                } else {
-                    cameraUI.style.display = 'flex';
+                const targetId = this.getAttribute('data-target');
+                const displayType = this.getAttribute('data-type');
+                document.getElementById(targetId).style.display = displayType;
+                
+                homeView.style.display = 'none';
+                detailView.style.display = 'block';
+                
+                if(displayType === 'grid') {
                     customCursor.style.display = 'block';
-                    initInnerSwiper(targetId);
+                    initInnerSwiper();
+                } else {
+                    customCursor.style.display = 'none';
                 }
-
-                if(navMenu.classList.contains('active')) toggleMenu();
             });
         });
 
-        function initInnerSwiper(groupId) {
-            const group = document.getElementById(groupId);
-            if (group.querySelector('.swiper')) {
-                currentActiveSwiper = innerSwipers[groupId];
-                updateCameraUI(currentActiveSwiper);
-                return;
-            }
+        document.getElementById('menu-home-btn').addEventListener('click', function() {
+            if (navMenu.classList.contains('active')) toggleMenu();
+            homeView.style.display = 'flex';
+            detailView.style.display = 'none';
+            customCursor.style.display = 'none';
+        });
 
-            const wrapper = document.createElement('div');
-            wrapper.className = 'swiper-wrapper';
-            Array.from(group.children).forEach(item => {
-                item.classList.add('swiper-slide');
-                wrapper.appendChild(item);
-            });
+        backBtn.addEventListener('click', function() {
+            homeView.style.display = 'flex';
+            detailView.style.display = 'none';
+            customCursor.style.display = 'none';
+        });
 
-            const container = document.createElement('div');
-            container.className = `swiper inner-${groupId}`;
-            container.appendChild(wrapper);
-            group.appendChild(container);
-
-            const sw = new Swiper(`.inner-${groupId}`, {
-                effect: "coverflow", centeredSlides: true, slidesPerView: "auto",
-                coverflowEffect: { rotate: 30, depth: 300, modifier: 1, slideShadows: true },
-                mousewheel: true,
-                on: { init: function() { updateCameraUI(this); }, slideChange: function() { updateCameraUI(this); } }
-            });
-            innerSwipers[groupId] = sw;
-            currentActiveSwiper = sw;
-        }
-
-        // 4. Cursor Follower
-        window.addEventListener('mousemove', e => {
+        // --- 4. เมาส์วงกลม ---
+        window.addEventListener('mousemove', function(e) {
             customCursor.style.left = e.clientX + 'px';
             customCursor.style.top = e.clientY + 'px';
         });
 
-        document.addEventListener('mouseover', e => {
-            if(e.target.closest('.grid-item, .home-slide, button')) customCursor.classList.add('active');
+        document.addEventListener('mouseover', function(e) {
+            if(e.target.closest('.grid-item')) customCursor.classList.add('active');
         });
-        document.addEventListener('mouseout', e => {
-            customCursor.classList.remove('active');
+        document.addEventListener('mouseout', function(e) {
+            if(e.target.closest('.grid-item')) customCursor.classList.remove('active');
         });
     </script>
 </body>
