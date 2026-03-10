@@ -131,7 +131,7 @@
         .overlay h3 { margin: 0; font-size: 1.5rem; } 
         .overlay p { margin: 5px 0 0 0; color: #ccc; font-size: 0.9rem; }
 
-        /* =========================================
+/* =========================================
            📱 โค้ดรองรับ จอมือถือ & แท็บเล็ต 📱
            ========================================= */
         @media (max-width: 1024px) {
@@ -149,17 +149,24 @@
             #detail-title { font-size: 2.5rem; }
             .profile-container { padding: 0 20px 100px 20px; }
             
-            /* บังคับสัดส่วนผลงานในมือถือ ไม่ให้ล้นจอ */
+            /* 🔴 แก้ไขสัดส่วนผลงานในมือถือ ลบขอบเทาออก ล่องหน 100% 🔴 */
             .project-group .swiper-slide { 
                 width: 85vw !important; 
-                height: 45vh !important; 
+                height: auto !important; /* ปล่อยให้ความสูงยืดหดตามสัดส่วนวิดีโอ/รูปอัตโนมัติ */
+                max-height: 65vh; /* แต่กันไม่ให้รูปแนวตั้งสูงเกินขอบจอ */
             }
-            .grid-item { width: 100%; height: 100%; }
+            .grid-item { 
+                width: 100%; 
+                height: auto; 
+                background: transparent !important; /* สั่งโปร่งใส */
+            }
             .grid-item img, .grid-item video { 
                 width: 100%; 
-                height: 100%; 
-                object-fit: contain; /* รูป/คลิปจะไม่ถูกตัดขอบ */
-                background: #0a0a0a; /* เติมพื้นหลังดำเนียนๆ กันขอบใส */
+                height: auto; 
+                max-height: 65vh; 
+                object-fit: contain; 
+                background: transparent !important; /* ❌ ตัวการสีเทาโดนลบแล้ว ❌ */
+                border-radius: 15px; /* ให้ขอบมนเกาะไปกับตัววิดีโอโดยตรง */
             }
             .overlay { padding: 20px; }
             .overlay h3 { font-size: 1.2rem; } 
@@ -453,4 +460,5 @@
     </script>
 </body>
 </html>
+
 
