@@ -149,11 +149,15 @@
 @media (min-width: 1800px) {
     .project-group { column-count: 5; }
 }
-        /* 🔴 โค้ดสำหรับระบบ 3D Coverflow 🔴 */
+/* 🔴 โค้ดสำหรับระบบ 3D Coverflow 🔴 */
 .project-group {
     column-count: auto !important; /* ยกเลิกระบบเรียงคอลัมน์แบบเก่า */
-    display: block !important;
     padding: 0 !important;
+}
+
+/* บังคับให้โชว์วงล้อ "เฉพาะตอนที่เรากดเปิดหน้านั้นๆ" เท่านั้น */
+.project-group[style*="display: grid"] {
+    display: block !important;
 }
 
 .swiper {
@@ -783,6 +787,7 @@ setTimeout(() => {
 
 </body>
 </html>
+
 
 
 
