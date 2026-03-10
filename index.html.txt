@@ -1,0 +1,690 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PORTFOLIO</title>
+    <style>
+        body { margin: 0; background-color: #050505; color: #fff; font-family: 'Segoe UI', sans-serif; overflow: hidden; }
+        .container { position: relative; width: 100vw; height: 100vh; touch-action: pan-y; }
+        #slide { width: 100%; height: 100%; position: absolute; }
+
+        .item { width: 240px; height: 360px; position: absolute; top: 50%; transform: translateY(-50%); border-radius: 20px; box-shadow: 0 15px 30px rgba(0,0,0,0.5); background-position: center; background-size: cover; transition: 0.5s ease-in-out; z-index: 1; user-select: none; }
+        .item:nth-child(1), .item:nth-child(2) { top: 0; left: 0; transform: translateY(0); width: 100%; height: 100%; border-radius: 0; box-shadow: none; z-index: 0; }
+        .item:nth-child(1)::after, .item:nth-child(2)::after { content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.7); }
+        .item:nth-child(3) { left: 55%; } .item:nth-child(4) { left: calc(55% + 260px); } .item:nth-child(5) { left: calc(55% + 520px); } .item:nth-child(n+6) { left: calc(55% + 780px); opacity: 0; }
+
+        .content { position: absolute; top: 50%; left: 10%; transform: translateY(-50%); width: 400px; text-align: left; z-index: 2; display: none; }
+        .item:nth-child(2) .content { display: block; }
+        .name { font-size: 3rem; font-weight: bold; margin-bottom: 10px; opacity: 0; animation: animate 1s ease-in-out 0.3s forwards; }
+        .des { margin-bottom: 20px; color: #ddd; opacity: 0; line-height: 1.5; animation: animate 1s ease-in-out 0.6s forwards; }
+        .open-folder { padding: 12px 24px; background: #fff; color: #000; border: none; border-radius: 30px; font-weight: bold; cursor: pointer; opacity: 0; animation: animate 1s ease-in-out 0.9s forwards; transition: 0.3s; }
+        .open-folder:hover { background: #ccc; }
+        @keyframes animate { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+
+        .controls { position: absolute; bottom: 50px; left: 50%; transform: translateX(-50%); z-index: 10; display: flex; gap: 20px; }
+        .controls button { width: 50px; height: 50px; border-radius: 50%; border: 2px solid #fff; background: rgba(255,255,255,0.1); color: white; font-size: 20px; cursor: pointer; backdrop-filter: blur(5px); transition: 0.3s; }
+        .controls button:hover { background: #fff; color: #000; }
+
+        /* Navbar & Menu 3 ขีด */
+        .navbar { position: fixed; top: 0; width: 100%; padding: 30px 50px; display: flex; justify-content: space-between; align-items: center; box-sizing: border-box; z-index: 100; mix-blend-mode: difference; }
+        .logo { font-size: 1.2rem; font-weight: bold; letter-spacing: 2px; text-transform: uppercase; }
+        .hamburger { cursor: pointer; display: flex; flex-direction: column; gap: 6px; z-index: 101; transition: 0.3s; } 
+        .hamburger .line { width: 30px; height: 2px; background-color: white; transition: 0.3s; }
+        .hamburger.active .line:nth-child(1) { transform: translateY(8px) rotate(45deg); }
+        .hamburger.active .line:nth-child(2) { opacity: 0; }
+        .hamburger.active .line:nth-child(3) { transform: translateY(-8px) rotate(-45deg); }
+
+        /* หน้าต่างเมนูเต็มจอ */
+        .nav-menu { position: fixed; top: 0; left: 0; width: 100%; height: 100vh; background: rgba(0,0,0,0.95); z-index: 90; display: flex; justify-content: center; align-items: center; opacity: 0; pointer-events: none; transition: 0.4s ease-in-out; }
+        .nav-menu.active { opacity: 1; pointer-events: all; }
+        .nav-menu ul { list-style: none; padding: 0; text-align: center; }
+        .nav-menu li { font-size: 2rem; margin: 25px 0; cursor: pointer; transition: 0.3s; font-weight: bold; color: #fff; letter-spacing: 2px; }
+        .nav-menu li:hover { color: #ff416c; transform: scale(1.1); }
+        .menu-home { color: #888 !important; font-size: 1.2rem !important; margin-bottom: 40px !important; }
+
+        #detail-view { position: absolute; top: 0; left: 0; width: 100%; height: 100vh; background-color: #050505; z-index: 50; padding-top: 100px; overflow-y: auto; box-sizing: border-box; }
+        .detail-header { padding: 0 50px; margin-bottom: 40px; }
+        #back-btn { background: none; border: none; color: #888; font-size: 1rem; cursor: pointer; padding: 0; margin-bottom: 20px; transition: color 0.3s; }
+        #back-btn:hover { color: #fff; }
+        #detail-title { font-size: 4rem; margin: 0; text-transform: uppercase; }
+
+        .profile-container { display: flex; gap: 50px; padding: 0 50px 100px 50px; flex-wrap: wrap; }
+        .profile-image-box { flex: 1; min-width: 300px; max-width: 450px; }
+        .profile-image-box img { width: 100%; border-radius: 20px; box-shadow: 0 10px 30px rgba(255,255,255,0.05); object-fit: cover; }
+        .profile-info-box { flex: 2; min-width: 300px; }
+        .profile-info-box h2 { font-size: 2rem; border-bottom: 1px solid #333; padding-bottom: 10px; margin-top: 0; }
+        .profile-info-box h3 { color: #888; font-size: 1.2rem; margin-top: 30px; margin-bottom: 15px; }
+        .profile-info-box p { font-size: 1.1rem; line-height: 1.8; color: #ccc; margin: 8px 0; }
+        .profile-info-box strong { color: #fff; }
+
+        .skill-group { margin-bottom: 20px; }
+        .skill-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; font-weight: bold; }
+        .skill-title { display: flex; align-items: center; gap: 10px; }
+        .skill-logo { width: 24px; height: 24px; object-fit: contain; border-radius: 4px; }
+        .progress-bar-bg { width: 100%; height: 10px; background-color: #222; border-radius: 10px; overflow: hidden; }
+        .progress-fill { height: 100%; background: linear-gradient(90deg, #ff416c, #ff4b2b); border-radius: 10px; transition: width 1.5s ease-in-out; }
+
+        .contact-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; }
+        .contact-item { background: #111; padding: 15px 20px; border-radius: 10px; border: 1px solid #222; display: flex; align-items: center; gap: 10px; }
+
+        /* 1. จัดกลุ่มผลงานเป็นคอลัมน์ (Pinterest Style) */
+        .project-group { 
+            column-count: 3; 
+            column-gap: 20px; 
+            padding: 0 50px 100px 50px; 
+        }
+
+        /* 2. กล่องผลงาน */
+        .grid-item { 
+            position: relative; 
+            width: 100%; 
+            margin-bottom: 20px; 
+            break-inside: avoid; 
+            overflow: hidden; 
+            cursor: none; 
+            background: #111; 
+        }
+
+        /* 3. รูปภาพให้ปรับความสูงตามจริง */
+        .grid-item img { 
+            width: 100%; 
+            height: auto; 
+            display: block; 
+            object-fit: cover; 
+            transition: transform 0.8s ease; 
+        }
+
+        /* 4. วิดีโอ Animation เล่นอัตโนมัติ */
+        .grid-item video { 
+            width: 100%; 
+            height: auto; 
+            border: none; 
+            display: block;
+            object-fit: cover;
+            transition: transform 0.8s ease; 
+        }
+
+        /* เพิ่มให้วิดีโอ/รูป ซูมขึ้นตอนเอาเมาส์ชี้ */
+        .grid-item:hover img, .grid-item:hover video { 
+            transform: scale(1.05); 
+        }
+
+        /* การตั้งค่า Hover แถบดำด้านล่าง */
+        .overlay { position: absolute; bottom: 0; left: 0; width: 100%; padding: 30px; background: linear-gradient(transparent, rgba(0,0,0,0.8)); box-sizing: border-box; opacity: 0; transform: translateY(20px); transition: all 0.4s ease; pointer-events: none; }
+        .grid-item:hover .overlay { opacity: 1; transform: translateY(0); }
+        .overlay h3 { margin: 0; font-size: 1.5rem; } 
+        .overlay p { margin: 5px 0 0 0; color: #ccc; font-size: 0.9rem; }
+
+        .cursor { width: 40px; height: 40px; border: 1px solid white; border-radius: 50%; position: fixed; pointer-events: none; transform: translate(-50%, -50%); z-index: 999; transition: width 0.3s, height 0.3s, background-color 0.3s; mix-blend-mode: difference; display: none; }
+        .cursor.active { width: 60px; height: 60px; background-color: rgba(255,255,255,0.2); backdrop-filter: blur(2px); }
+
+        /* ปรับให้รองรับมือถือ */
+        @media (max-width: 768px) {
+            .controls { display: none; }
+            .content { width: 80%; left: 10%; }
+            .name { font-size: 2rem; }
+            .project-group {
+                column-count: 1;
+                padding: 0 20px 100px 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <nav class="navbar">
+        <div class="logo">PORTFOLIO</div>
+        <div class="hamburger" id="hamburger-btn">
+            <div class="line"></div>
+            <div class="line"></div>
+            <div class="line"></div>
+        </div>
+    </nav>
+
+    <div class="nav-menu" id="nav-menu">
+        <ul>
+            <li class="menu-home" id="menu-home-btn">HOME (หน้าหลัก)</li>
+            <li class="menu-link" data-title="ABOUT ME" data-target="profile-section" data-type="flex">PROFILE</li>
+            <li class="menu-link" data-title="YEAR 1 PROJECTS" data-target="year1-projects" data-type="grid">YEAR 1</li>
+            <li class="menu-link" data-title="YEAR 2 PROJECTS" data-target="year2-projects" data-type="grid">YEAR 2</li>
+            <li class="menu-link" data-title="YEAR 3 PROJECTS" data-target="year3-projects" data-type="grid">YEAR 3</li>
+            <li class="menu-link" data-title="YEAR 4 PROJECTS" data-target="year4-projects" data-type="grid">YEAR 4</li>
+            <li class="menu-link" data-title="MY FAVORITE WORKS" data-target="favorite-projects" data-type="grid">ART WORK</li>
+        </ul>
+    </div>
+
+    <div class="cursor" id="custom-cursor"></div>
+
+    <div id="home-view" class="container">
+        <div id="slide">
+            
+            <div class="item" style="background-image: url('https://i.postimg.cc/cJDkBn2y/DSC005691.jpg');">
+                <div class="content">
+                    <div class="name">PROFILE</div>
+                    <div class="des">ข้อมูลส่วนตัว ประวัติการศึกษา<br>และทักษะความสามารถ</div>
+                    <button class="open-folder" data-title="ABOUT ME" data-target="profile-section" data-type="flex">ดูประวัติ</button>
+                </div>
+            </div>
+
+            <div class="item" style="background-image: url('https://i.postimg.cc/mgVWKhK2/Artboard-1.jpg');">
+                <div class="content">
+                    <div class="name">YEAR 1</div>
+                    <div class="des">ผลงานชั้นปีที่ 1</div>
+                    <button class="open-folder" data-title="YEAR 1 PROJECTS" data-target="year1-projects" data-type="grid">ดูผลงาน</button>
+                </div>
+            </div>
+            
+            <div class="item" style="background-image: url('https://i.postimg.cc/L89rk25G/Artboard-2.jpg');">
+                <div class="content">
+                    <div class="name">YEAR 2</div>
+                    <div class="des">ผลงานชั้นปีที่ 2</div>
+                    <button class="open-folder" data-title="YEAR 2 PROJECTS" data-target="year2-projects" data-type="grid">ดูผลงาน</button>
+                </div>
+            </div>
+
+            <div class="item" style="background-image: url('https://i.postimg.cc/Hn0h5hgp/Artboard-3.jpg');">
+                <div class="content">
+                    <div class="name">YEAR 3</div>
+                    <div class="des">ผลงานชั้นปีที่ 3</div>
+                    <button class="open-folder" data-title="YEAR 3 PROJECTS" data-target="year3-projects" data-type="grid">ดูผลงาน</button>
+                </div>
+            </div>
+
+            <div class="item" style="background-image: url('https://i.postimg.cc/Qddy9mYz/Artboard-4.jpg');">
+                <div class="content">
+                    <div class="name">YEAR 4</div>
+                    <div class="des">ผลงานชั้นปีที่ 4</div>
+                    <button class="open-folder" data-title="YEAR 4 PROJECTS" data-target="year4-projects" data-type="grid">ดูผลงาน</button>
+                </div>
+            </div>
+
+            <div class="item" style="background-image: url('https://i.postimg.cc/5t4njWbX/Comp-5.gif');">
+                <div class="content">
+                    <div class="name">ART WORK</div>
+                    <div class="des">ผลงานส่วนตัว</div>
+                    <button class="open-folder" data-title="MY FAVORITE WORKS" data-target="favorite-projects" data-type="grid">ดูผลงาน</button>
+                </div>
+            </div>
+
+        </div>
+        
+        <div class="controls">
+            <button id="prev">❮</button>
+            <button id="next">❯</button>
+        </div>
+    </div>
+
+    <div id="detail-view" style="display: none;">
+        <div class="detail-header">
+            <button id="back-btn">← BACK TO FOLDERS</button>
+            <h1 id="detail-title">PROJECTS</h1>
+        </div>
+        
+        <div id="profile-section" class="view-group profile-container" style="display: none;">
+            <div class="profile-image-box">
+                <img src="https://i.postimg.cc/6qVQDtdG/DSC00569.jpg" alt="Boat Khunanon">
+            </div>
+            <div class="profile-info-box">
+                <h2>Profile</h2>
+                <p>ชื่อนาย คุณานนต์ ไชยสามารถ ชื่อเล่น โบ๊ท เกิดวันที่ 8 สิงหาคม 2546 อายุ 22 ปี เป็นนักศึกษาชั้นปีที่ 3 สาขาดิจิทัลอาร์ต คณะมนุษยศาสตร์และสังคมศาสตร์</p>
+                <p>มีความสนใจด้านผลงานดิจิทัลเเละชื่นชอบการทำภาพนิ่งให้ดูมีชีวิตสไตล์งานที่ชอบคือ 2D idle loop Animation การเคลื่อนไหวเเบบจำกัดเเละพร้อมพัฒนาความคิดสร้างสรรค์มาโดยตลอด</p>
+                <p>My name is Kunanon Chaisamart, nicknamed Boat. I was born on August 8, 2003, and I am 22 years old. I am a third-year student majoring in Digital Art at the Faculty of Humanities and Social Sciences.</p>
+                <p>I am interested in digital art and enjoy bringing still images to life. My preferred style is 2D idle loop animation (limited movement), and I am always ready to develop my creativity.</p>
+
+                <h3>Education</h3>
+                <p><strong>2562 :</strong> โรงเรียนเลยอนุกูลวิทยา</p>
+                <p><strong>2566 - ปัจจุบัน:</strong> มหาวิทยาลัยราชภัฏเลย</p>
+
+                <h3>Skills</h3>
+                <div class="skill-group">
+                    <div class="skill-header">
+                        <span class="skill-title">
+                            <img src="https://i.postimg.cc/9fBJF7Cs/images.png" alt="AE Logo" class="skill-logo">
+                            After Effects
+                        </span>
+                        <span>90%</span>
+                    </div>
+                    <div class="progress-bar-bg"><div class="progress-fill" style="width: 90%;"></div></div>
+                </div>
+                
+                <div class="skill-group">
+                    <div class="skill-header">
+                        <span class="skill-title">
+                            <img src="https://i.postimg.cc/KcppMBLs/Adobe-Photoshop-CC-icon-svg.png" alt="PS Logo" class="skill-logo">
+                            Photoshop
+                        </span>
+                        <span>95%</span>
+                    </div>
+                    <div class="progress-bar-bg"><div class="progress-fill" style="width: 95%;"></div></div>
+                </div>
+                <div class="skill-group">
+                    <div class="skill-header">
+                        <span class="skill-title">
+                            <img src="https://i.postimg.cc/zfT8DWDH/images-(1).png" alt="Ai Logo" class="skill-logo">
+                            Illustrator
+                        </span>
+                        <span>60%</span>
+                    </div>
+                    <div class="progress-bar-bg"><div class="progress-fill" style="width: 60%;"></div></div>
+                </div>
+
+                <h3>Contact</h3>
+                <div class="contact-grid">
+                    <div class="contact-item"><strong>Phone:</strong> 080-723-7949</div>
+                    <div class="contact-item"><strong>Gmail:</strong> chaisamartk@gmail.com</div>
+                    <div class="contact-item"><strong>Instagram:</strong> Knn.mt_</div>
+                    <div class="contact-item"><strong>Facebook:</strong> Kunanon Chaisamart</div>
+                    <div class="contact-item"><strong>Line:</strong> temboren</div>
+                    <div class="contact-item"><strong>TikTok:</strong> Qunnerla</div>
+                </div>
+            </div>
+        </div>
+
+        <div id="year1-projects" class="view-group project-group" style="display: none;">
+            <div class="grid-item">
+                <img src="https://i.postimg.cc/gjZpxZmZ/IMG-3874.jpg" alt="Work">
+                <div class="overlay"><h3>รายวิชาวาดเส้นเพื่องานดิจิทัลอาร์ต</h3><p>ศาสตราจารย์ ธีระพงษ์ พิทักษ์ศฤงคาร</p></div>
+            </div>
+            <div class="grid-item">
+                <img src="https://i.postimg.cc/tgv7PFQ6/IMG-3875.jpg" alt="Work">
+                <div class="overlay"><h3>รายวิชาวาดเส้นเพื่องานดิจิทัลอาร์ต</h3><p>ศาสตราจารย์ ธีระพงษ์ พิทักษ์ศฤงคาร</p></div>
+            </div>
+            <div class="grid-item">
+                <img src="https://i.postimg.cc/HxCk1m5m/IMG-3876.jpg" alt="Work">
+                <div class="overlay"><h3>รายวิชาวาดเส้นเพื่องานดิจิทัลอาร์ต</h3><p>ศาสตราจารย์ ธีระพงษ์ พิทักษ์ศฤงคาร</p></div>
+            </div>
+            <div class="grid-item">
+                <img src="https://i.postimg.cc/QxS9gF7k/IMG-3878.jpg" alt="Work">
+                <div class="overlay"><h3>รายวิชาวาดเส้นเพื่องานดิจิทัลอาร์ต</h3><p>ศาสตราจารย์ ธีระพงษ์ พิทักษ์ศฤงคาร</p></div>
+            </div>
+            <div class="grid-item">
+                <img src="https://i.postimg.cc/SRF8PHQL/IMG-3877.jpg" alt="Work">
+                <div class="overlay"><h3>รายวิชาวาดเส้นเพื่องานดิจิทัลอาร์ต</h3><p>ศาสตราจารย์ ธีระพงษ์ พิทักษ์ศฤงคาร</p></div>
+            </div>
+        </div>
+
+        <div id="year2-projects" class="view-group project-group" style="display: none;">
+            <div class="grid-item">
+                <img src="https://i.postimg.cc/j2Tz3Bvz/AMBIGUOUS-FG02.jpg" alt="Work">
+                <div class="overlay"><h3>รายวิชาการสร้างสรรค์ตัวอักษร</h3><p>ผู้ช่วยศาสตราจารย์ ดร.อิสริยาภรณ์ ชัยกุหลาบ</p></div>
+            </div>
+            <div class="grid-item">
+                <img src="https://i.postimg.cc/2yLPTbct/STABLE-FG01.jpg" alt="Work">
+                <div class="overlay"><h3>รายวิชาการสร้างสรรค์ตัวอักษร</h3><p>ผู้ช่วยศาสตราจารย์ ดร.อิสริยาภรณ์ ชัยกุหลาบ</p></div>
+            </div>
+            <div class="grid-item">
+                <img src="https://i.postimg.cc/X7bbxxWr/Similarity-Stairs.jpg" alt="Work">
+                <div class="overlay"><h3>รายวิชาการสร้างสรรค์ตัวอักษร</h3><p>ผู้ช่วยศาสตราจารย์ ดร.อิสริยาภรณ์ ชัยกุหลาบ</p></div>
+            </div>
+            <div class="grid-item">
+                <img src="https://i.postimg.cc/fy716ns3/Continuity-Dream.jpg" alt="Work">
+                <div class="overlay"><h3>รายวิชาการสร้างสรรค์ตัวอักษร</h3><p>ผู้ช่วยศาสตราจารย์ ดร.อิสริยาภรณ์ ชัยกุหลาบ</p></div>
+            </div>
+            <div class="grid-item">
+                <img src="https://i.postimg.cc/Jh9g044G/2-Letters-plus-image.jpg" alt="Work">
+                <div class="overlay"><h3>รายวิชาการสร้างสรรค์ตัวอักษร</h3><p>ผู้ช่วยศาสตราจารย์ ดร.อิสริยาภรณ์ ชัยกุหลาบ</p></div>
+            </div>
+            <div class="grid-item">
+                <img src="https://i.postimg.cc/FKJWM5b2/3-Types-as-3D.jpg" alt="Work">
+                <div class="overlay"><h3>รายวิชาการสร้างสรรค์ตัวอักษร</h3><p>ผู้ช่วยศาสตราจารย์ ดร.อิสริยาภรณ์ ชัยกุหลาบ</p></div>
+            </div>
+            <div class="grid-item">
+                <img src="https://i.postimg.cc/MT7sG7Fr/Common-region-Slimz.jpg" alt="Work">
+                <div class="overlay"><h3>รายวิชาการสร้างสรรค์ตัวอักษร</h3><p>ผู้ช่วยศาสตราจารย์ ดร.อิสริยาภรณ์ ชัยกุหลาบ</p></div>
+            </div>
+            <div class="grid-item">
+                <img src="https://i.postimg.cc/25Fvb0C9/IMG-3864.jpg" alt="Work">
+                <div class="overlay"><h3>รายวิชาการสร้างสรรค์ตัวอักษร</h3><p>ผู้ช่วยศาสตราจารย์ ดร.อิสริยาภรณ์ ชัยกุหลาบ</p></div>
+            </div>
+            <div class="grid-item">
+                <img src="https://i.postimg.cc/Kz8KKFqy/1.jpg" alt="Work">
+                <div class="overlay"><h3>รายวิชาการสร้างสรรค์ตัวอักษร</h3><p>ผู้ช่วยศาสตราจารย์ ดร.อิสริยาภรณ์ ชัยกุหลาบ</p></div>
+            </div>
+            <div class="grid-item">
+                <img src="https://i.postimg.cc/BQkwMnHz/14.jpg" alt="Work">
+                <div class="overlay"><h3>รายวิชาการสร้างสรรค์ตัวอักษร</h3><p>ผู้ช่วยศาสตราจารย์ ดร.อิสริยาภรณ์ ชัยกุหลาบ</p></div>
+            </div>
+            <div class="grid-item">
+                <img src="https://i.postimg.cc/KvRHPMk8/2.jpg" alt="Work">
+                <div class="overlay"><h3>รายวิชาการสร้างสรรค์ตัวอักษร</h3><p>ผู้ช่วยศาสตราจารย์ ดร.อิสริยาภรณ์ ชัยกุหลาบ</p></div>
+            </div>
+            <div class="grid-item">
+                <img src="https://i.postimg.cc/pLKkCY2p/3.jpg" alt="Work">
+                <div class="overlay"><h3>รายวิชาการสร้างสรรค์ตัวอักษร</h3><p>ผู้ช่วยศาสตราจารย์ ดร.อิสริยาภรณ์ ชัยกุหลาบ</p></div>
+            </div>
+            <div class="grid-item">
+                <img src="https://i.postimg.cc/9f8xwXm9/4.jpg" alt="Work">
+                <div class="overlay"><h3>รายวิชาการสร้างสรรค์ตัวอักษร</h3><p>ผู้ช่วยศาสตราจารย์ ดร.อิสริยาภรณ์ ชัยกุหลาบ</p></div>
+            </div>
+            <div class="grid-item">
+                <img src="https://i.postimg.cc/JnspNwt7/5.jpg" alt="Work">
+                <div class="overlay"><h3>รายวิชาการสร้างสรรค์ตัวอักษร</h3><p>ผู้ช่วยศาสตราจารย์ ดร.อิสริยาภรณ์ ชัยกุหลาบ</p></div>
+            </div>
+            <div class="grid-item">
+                <img src="https://i.postimg.cc/P5tsmxHT/TEE-YOD-1-FINAL-REMAKE.jpg" alt="Work">
+                <div class="overlay"><h3>รายวิชาการออกเเบบสื่อสิ่งพิมพ์โฆษณา</h3><p>ผู้ช่วยศาสตราจารย์ ดร.อิสริยาภรณ์ ชัยกุหลาบ</p></div>
+            </div>
+            <div class="grid-item">
+                <img src="https://i.postimg.cc/3xnM9Trw/TEE-YOD-2-FINAL-REMAK.jpg" alt="Work">
+                <div class="overlay"><h3>รายวิชาการออกเเบบสื่อสิ่งพิมพ์โฆษณา</h3><p>ผู้ช่วยศาสตราจารย์ ดร.อิสริยาภรณ์ ชัยกุหลาบ</p></div>
+            </div>
+            <div class="grid-item">
+                <img src="https://i.postimg.cc/ZKS1SRCZ/THE-MEDIUM-REMAK.jpg" alt="Work">
+                <div class="overlay"><h3>รายวิชาการออกเเบบสื่อสิ่งพิมพ์โฆษณา</h3><p>ผู้ช่วยศาสตราจารย์ ดร.อิสริยาภรณ์ ชัยกุหลาบ</p></div>
+            </div>
+            <div class="grid-item">
+                <img src="https://i.postimg.cc/HnV18P1n/devil-bird.jpg" alt="Work">
+                <div class="overlay"><h3>รายวิชาวาดเส้นสร้างสรรค์ </h3><p>ศาสตราจารย์ ธีระพงษ์ พิทักษ์ศฤงคาร</p></div>
+            </div>
+            <div class="grid-item">
+                <img src="https://i.postimg.cc/dtZKqXBP/Peacefull-hills.jpg" alt="Work">
+                <div class="overlay"><h3>รายวิชาวาดเส้นสร้างสรรค์</h3><p>ศาสตราจารย์ ธีระพงษ์ พิทักษ์ศฤงคาร</p></div>
+            </div>
+            <div class="grid-item">
+                <img src="https://i.postimg.cc/TwTDxnMb/PEETAKON.jpg" alt="Work">
+                <div class="overlay"><h3>รายวิชาวาดภาพคาเเรคเตอร์ฯ</h3><p>ศาสตราจารย์ ชัยทวี บุบผา</p></div>
+            </div>
+            <div class="grid-item">
+                <img src="https://i.postimg.cc/cJFsK3t9/Mermaid.jpg" alt="Work">
+                <div class="overlay"><h3>รายวิชาวาดภาพคาเเรคเตอร์ฯ</h3><p>ศาสตราจารย์ ชัยทวี บุบผา</p></div>
+            </div>
+            <div class="grid-item">
+                <img src="https://i.postimg.cc/GhnHnkFT/IMG-5527.jpg" alt="Work">
+                <div class="overlay"><h3>รายวิชาวาดภาพคาเเรคเตอร์ฯ</h3><p>ศาสตราจารย์ ชัยทวี บุบผา</p></div>
+            </div>
+            <div class="grid-item">
+                <img src="https://i.postimg.cc/pdrdJkHw/eagle.jpg" alt="Work">
+                <div class="overlay"><h3>รายวิชาวาดภาพคาเเรคเตอร์ฯ</h3><p>ศาสตราจารย์ ชัยทวี บุบผา</p></div>
+            </div>
+        </div>
+
+        <div id="year3-projects" class="view-group project-group" style="display: none;">
+            <div class="grid-item">
+                <img src="https://i.postimg.cc/Cx3MT8nC/7.jpg" alt="Work">
+                <div class="overlay"><h3>รายวิชาการสร้างสรรค์กราฟิกบรรจุภัณฑ์</h3><p>ผู้ช่วยศาสตราจารย์ ดร.อิสริยาภรณ์ ชัยกุหลาบ</p></div>
+            </div>
+            <div class="grid-item">
+                <img src="https://i.postimg.cc/rwxX4Pzr/8.jpg" alt="Work">
+                <div class="overlay"><h3>รายวิชาการสร้างสรรค์กราฟิกบรรจุภัณฑ์</h3><p>ผู้ช่วยศาสตราจารย์ ดร.อิสริยาภรณ์ ชัยกุหลาบ</p></div>
+            </div>
+            <div class="grid-item">
+                <img src="https://i.postimg.cc/wxmSZrQt/9.jpg" alt="Work">
+                <div class="overlay"><h3>รายวิชาการสร้างสรรค์กราฟิกบรรจุภัณฑ์</h3><p>ผู้ช่วยศาสตราจารย์ ดร.อิสริยาภรณ์ ชัยกุหลาบ</p></div>
+            </div>
+            <div class="grid-item">
+                <img src="https://i.postimg.cc/ZKPXKygb/10.jpg" alt="Work">
+                <div class="overlay"><h3>รายวิชาการสร้างสรรค์กราฟิกบรรจุภัณฑ์</h3><p>ผู้ช่วยศาสตราจารย์ ดร.อิสริยาภรณ์ ชัยกุหลาบ</p></div>
+            </div>
+            <div class="grid-item">
+                <img src="https://i.postimg.cc/W1gz4SVz/sanea-khxng-w-d-phra-that-sr-sxngr-k.jpg" alt="Work">
+                <div class="overlay"><h3>รายวิชาการถ่ายภาพดิจิทัลเเละการตกเเต่งภาพ</h3><p>ผู้ช่วยศาสตราจารย์ ศรัณยพัชร์ จิตพิไล</p></div>
+            </div>
+            <div class="grid-item">
+                <img src="https://i.postimg.cc/rs5ypw6Y/r-p-pra-thrrm.jpg" alt="Work">
+                <div class="overlay"><h3>รายวิชาการถ่ายภาพดิจิทัลเเละการตกเเต่งภาพ</h3><p>ผู้ช่วยศาสตราจารย์ ศรัณยพัชร์ จิตพิไล</p></div>
+            </div>
+            <div class="grid-item">
+                <img src="https://i.postimg.cc/65YJfvhL/namthrrm.jpg" alt="Work">
+                <div class="overlay"><h3>รายวิชาการถ่ายภาพดิจิทัลเเละการตกเเต่งภาพ</h3><p>ผู้ช่วยศาสตราจารย์ ศรัณยพัชร์ จิตพิไล</p></div>
+            </div>
+            <div class="grid-item">
+                <img src="https://i.postimg.cc/1tcYRkCf/IMG-2885.jpg" alt="Work">
+                <div class="overlay"><h3>รายวิชาการถ่ายภาพดิจิทัลเเละการตกเเต่งภาพ</h3><p>ผู้ช่วยศาสตราจารย์ ศรัณยพัชร์ จิตพิไล</p></div>
+            </div>
+            <div class="grid-item">
+                <img src="https://i.postimg.cc/8PnXCBHn/IMG-2889.jpg" alt="Work">
+                <div class="overlay"><h3>รายวิชาการถ่ายภาพดิจิทัลเเละการตกเเต่งภาพ</h3><p>ผู้ช่วยศาสตราจารย์ ศรัณยพัชร์ จิตพิไล</p></div>
+            </div>
+            <div class="grid-item">
+                <img src="https://i.postimg.cc/6pkHrWFy/IMG-2890.jpg" alt="Work">
+                <div class="overlay"><h3>รายวิชาการถ่ายภาพดิจิทัลเเละการตกเเต่งภาพ</h3><p>ผู้ช่วยศาสตราจารย์ ศรัณยพัชร์ จิตพิไล</p></div>
+            </div>
+            <div class="grid-item">
+                <img src="https://i.postimg.cc/N0Rdphct/IMG-2891.jpg" alt="Work">
+                <div class="overlay"><h3>รายวิชาการถ่ายภาพดิจิทัลเเละการตกเเต่งภาพ</h3><p>ผู้ช่วยศาสตราจารย์ ศรัณยพัชร์ จิตพิไล</p></div>
+            </div>
+            <div class="grid-item">
+                <img src="https://i.postimg.cc/ydPvCFxX/IMG-2892.jpg" alt="Work">
+                <div class="overlay"><h3>รายวิชาการถ่ายภาพดิจิทัลเเละการตกเเต่งภาพ</h3><p>ผู้ช่วยศาสตราจารย์ ศรัณยพัชร์ จิตพิไล</p></div>
+            </div>
+            <div class="grid-item">
+                <img src="https://i.postimg.cc/x8p5cnKN/IMG-2893.jpg" alt="Work">
+                <div class="overlay"><h3>รายวิชาการถ่ายภาพดิจิทัลเเละการตกเเต่งภาพ</h3><p>ผู้ช่วยศาสตราจารย์ ศรัณยพัชร์ จิตพิไล</p></div>
+            </div>
+            <div class="grid-item">
+                <img src="https://i.postimg.cc/g0B3VNx4/High-End-Fashion-Magazines.jpg" alt="Work">
+                <div class="overlay"><h3>รายวิชาการสร้างสรรค์อัตลักษณ์ตราสินค้า</h3><p>ผู้ช่วยศาสตราจารย์ ดร.อิสริยาภรณ์ ชัยกุหลาบ</p></div>
+            </div>
+            <div class="grid-item">
+                <img src="https://i.postimg.cc/7LpfPcGJ/CATALOG.jpg" alt="Work">
+                <div class="overlay"><h3>รายวิชาการสร้างสรรค์อัตลักษณ์ตราสินค้า</h3><p>ผู้ช่วยศาสตราจารย์ ดร.อิสริยาภรณ์ ชัยกุหลาบ</p></div>
+            </div>
+            <div class="grid-item">
+                <img src="https://i.postimg.cc/90cXrjWQ/Poster-Hig-H-END.jpg" alt="Work">
+                <div class="overlay"><h3>รายวิชาการสร้างสรรค์อัตลักษณ์ตราสินค้า</h3><p>ผู้ช่วยศาสตราจารย์ ดร.อิสริยาภรณ์ ชัยกุหลาบ</p></div>
+            </div>
+            <div class="grid-item">
+                <img src="https://i.postimg.cc/MZYKgXDf/Interactive-Billboards.jpg" alt="Work">
+                <div class="overlay"><h3>รายวิชาการสร้างสรรค์อัตลักษณ์ตราสินค้า</h3><p>ผู้ช่วยศาสตราจารย์ ดร.อิสริยาภรณ์ ชัยกุหลาบ</p></div>
+            </div>
+            <div class="grid-item">
+                <img src="https://i.postimg.cc/prj7bmw7/Vector.jpg" alt="Work">
+                <div class="overlay"><h3>รายวิชาการสร้างสรรค์อัตลักษณ์ตราสินค้า</h3><p>ผู้ช่วยศาสตราจารย์ ดร.อิสริยาภรณ์ ชัยกุหลาบ</p></div>
+            </div>
+            <div class="grid-item">
+                <img src="https://i.postimg.cc/NfhS8xTv/logo.png" alt="Work">
+                <div class="overlay"><h3>รายวิชาการสร้างสรรค์อัตลักษณ์ตราสินค้า</h3><p>ผู้ช่วยศาสตราจารย์ ดร.อิสริยาภรณ์ ชัยกุหลาบ</p></div>
+            </div>
+            <div class="grid-item">
+                <img src="https://i.postimg.cc/8cdHmLQM/Artboard-2.jpg" alt="Work">
+                <div class="overlay"><h3>รายวิชาการสร้างสรรค์อัตลักษณ์ตราสินค้า</h3><p>ผู้ช่วยศาสตราจารย์ ดร.อิสริยาภรณ์ ชัยกุหลาบ</p></div>
+            </div>
+            <div class="grid-item">
+                <img src="https://i.postimg.cc/ZKZjKspv/Artboard-3.jpg" alt="Work">
+                <div class="overlay"><h3>รายวิชาการสร้างสรรค์อัตลักษณ์ตราสินค้า</h3><p>ผู้ช่วยศาสตราจารย์ ดร.อิสริยาภรณ์ ชัยกุหลาบ</p></div>
+            </div>
+            <div class="grid-item">
+                <img src="https://i.postimg.cc/sggc5Bnj/Artboard-4.jpg" alt="Work">
+                <div class="overlay"><h3>รายวิชาการสร้างสรรค์อัตลักษณ์ตราสินค้า</h3><p>ผู้ช่วยศาสตราจารย์ ดร.อิสริยาภรณ์ ชัยกุหลาบ</p></div>
+            </div>
+            <div class="grid-item">
+                <img src="https://i.postimg.cc/vm1tSJwM/Artboard-1.jpg" alt="Work">
+                <div class="overlay"><h3>รายวิชาการสร้างสรรค์อัตลักษณ์ตราสินค้า</h3><p>ผู้ช่วยศาสตราจารย์ ดร.อิสริยาภรณ์ ชัยกุหลาบ</p></div>
+            </div>
+            <div class="grid-item">
+                <img src="https://i.postimg.cc/6QDfsMBC/Artboard-5.jpg" alt="Work">
+                <div class="overlay"><h3>รายวิชาการสร้างสรรค์อัตลักษณ์ตราสินค้า</h3><p>ผู้ช่วยศาสตราจารย์ ดร.อิสริยาภรณ์ ชัยกุหลาบ</p></div>
+            </div>
+            <div class="grid-item">
+                <img src="https://i.postimg.cc/1zpftBpG/w-d-cxm-mn.jpg" alt="Work">
+                <div class="overlay"><h3>รายวิชาเทคนิคการตัดต่อภาพยนตร์ด้วยระบบดิจิทัล</h3><p>ผู้ช่วยศาสตราจารย์ ศรัณยพัชร์ จิตพิไล</p></div>
+            </div>
+            <div class="grid-item">
+                <img src="https://i.postimg.cc/C175CKry/w-dp-a-pra-cha-srr-kh.jpg" alt="Work">
+                <div class="overlay"><h3>รายวิชาเทคนิคการตัดต่อภาพยนตร์ด้วยระบบดิจิทัล</h3><p>ผู้ช่วยศาสตราจารย์ ศรัณยพัชร์ จิตพิไล</p></div>
+            </div>
+            <div class="grid-item">
+                <img src="https://i.postimg.cc/tJmgfMjG/w-dw-ngsaph-ngph-t'h-na-ram.jpg" alt="Work">
+                <div class="overlay"><h3>รายวิชาเทคนิคการตัดต่อภาพยนตร์ด้วยระบบดิจิทัล</h3><p>ผู้ช่วยศาสตราจารย์ ศรัณยพัชร์ จิตพิไล</p></div>
+            </div>
+            <div class="grid-item">
+                <img src="https://i.postimg.cc/rF3mN3j0/w-dsr-chmch-n.jpg" alt="Work">
+                <div class="overlay"><h3>รายวิชาเทคนิคการตัดต่อภาพยนตร์ด้วยระบบดิจิทัล</h3><p>ผู้ช่วยศาสตราจารย์ ศรัณยพัชร์ จิตพิไล</p></div>
+            </div>
+        </div>
+
+        <div id="year4-projects" class="view-group project-group" style="display: none;">
+            <div class="grid-item">
+                <img src="0" alt="Work">
+                <div class="overlay"><h3></h3><p>Year 4</p></div>
+            </div>
+        </div>
+
+        <div id="favorite-projects" class="view-group project-group" style="display: none;">
+            
+            <div class="grid-item">
+                <video autoplay loop muted playsinline>
+                    <source src="Airi-Witching-Hour.mp4" type="video/mp4">
+                </video>
+                <div class="overlay"><h3>Airi Witching Hour</h3><p>LIVE 2D ANIMATION</p></div>
+            </div>
+            
+            <div class="grid-item">
+                <video autoplay loop muted playsinline>
+                    <source src="Aya-Cinnamoroll-Dream.mp4" type="video/mp4">
+                </video>
+                <div class="overlay"><h3>Aya Cinnamoroll</h3><p>LIVE 2D ANIMATION</p></div>
+            </div>
+            
+            <div class="grid-item">
+                <video autoplay loop muted playsinline>
+                    <source src="Diao-chan-Elemental-Divinity.mp4" type="video/mp4">
+                </video>
+                <div class="overlay"><h3>Diao Chan Elemental</h3><p>LIVE 2D ANIMATION</p></div>
+            </div>
+            
+            <div class="grid-item">
+                <video autoplay loop muted playsinline>
+                    <source src="Hayate-Kid-the-Phantom.mp4" type="video/mp4">
+                </video>
+                <div class="overlay"><h3>Hayate Kid the Phantom</h3><p>LIVE 2D ANIMATION</p></div>
+            </div>
+            
+            <div class="grid-item">
+                <video autoplay loop muted playsinline>
+                    <source src="Iggy-Rimuru-tempest.mp4" type="video/mp4">
+                </video>
+                <div class="overlay"><h3>Iggy Rimuru Tempest</h3><p>LIVE 2D ANIMATION</p></div>
+            </div>
+            
+            <div class="grid-item">
+                <video autoplay loop muted playsinline>
+                    <source src="Liliana-Witching-Hour.mp4" type="video/mp4">
+                </video>
+                <div class="overlay"><h3>Liliana Witching Hour</h3><p>LIVE 2D ANIMATION</p></div>
+            </div>
+            
+            <div class="grid-item">
+                <video autoplay loop muted playsinline>
+                    <source src="Murad-Moon-Chuser.mp4" type="video/mp4">
+                </video>
+                <div class="overlay"><h3>Murad Moon Chuser</h3><p>LIVE 2D ANIMATION</p></div>
+            </div>
+            
+            <div class="grid-item">
+                <video autoplay loop muted playsinline>
+                    <source src="Nakroth-Stellar-Troupe.mp4" type="video/mp4">
+                </video>
+                <div class="overlay"><h3>Nakroth Stellar Troupe</h3><p>LIVE 2D ANIMATION</p></div>
+            </div>
+
+            <div class="grid-item">
+                <video autoplay loop muted playsinline>
+                    <source src="Natalya-Kuromi-Heart.mp4" type="video/mp4">
+                </video>
+                <div class="overlay"><h3>Natalya Kuromi Heart</h3><p>LIVE 2D ANIMATION</p></div>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        // --- 1. ระบบกดปุ่มลูกศร ---
+        function slideNext() {
+            let lists = document.querySelectorAll('#home-view .item');
+            document.getElementById('slide').appendChild(lists[0]);
+        }
+        function slidePrev() {
+            let lists = document.querySelectorAll('#home-view .item');
+            document.getElementById('slide').prepend(lists[lists.length - 1]);
+        }
+        document.getElementById('next').onclick = slideNext;
+        document.getElementById('prev').onclick = slidePrev;
+
+        // --- 2. ระบบใช้นิ้วปัด (Swipe) เลื่อนหน้าจอ ---
+        let startX = 0;
+        let endX = 0;
+        const homeContainer = document.getElementById('home-view');
+
+        homeContainer.addEventListener('touchstart', e => {
+            startX = e.changedTouches[0].screenX;
+        });
+        homeContainer.addEventListener('touchend', e => {
+            endX = e.changedTouches[0].screenX;
+            if (startX - endX > 50) slideNext(); 
+            if (endX - startX > 50) slidePrev(); 
+        });
+
+        homeContainer.addEventListener('mousedown', e => { startX = e.screenX; });
+        homeContainer.addEventListener('mouseup', e => {
+            endX = e.screenX;
+            if (startX - endX > 50) slideNext();
+            if (endX - startX > 50) slidePrev();
+        });
+
+        // --- 3. ระบบเมนู 3 ขีด (Hamburger) ---
+        const hamburgerBtn = document.getElementById('hamburger-btn');
+        const navMenu = document.getElementById('nav-menu');
+
+        function toggleMenu() {
+            hamburgerBtn.classList.toggle('active');
+            navMenu.classList.toggle('active');
+        }
+        hamburgerBtn.addEventListener('click', toggleMenu);
+
+        // --- 4. ระบบเปลี่ยนหน้า ---
+        const homeView = document.getElementById('home-view');
+        const detailView = document.getElementById('detail-view');
+        const backBtn = document.getElementById('back-btn');
+        const detailTitle = document.getElementById('detail-title');
+        const customCursor = document.getElementById('custom-cursor');
+
+        document.querySelectorAll('.open-folder, .menu-link').forEach(button => {
+            button.addEventListener('click', function() {
+                if (navMenu.classList.contains('active')) toggleMenu();
+
+                detailTitle.innerText = this.getAttribute('data-title');
+                
+                document.querySelectorAll('.view-group').forEach(group => {
+                    group.style.display = 'none';
+                });
+
+                const targetId = this.getAttribute('data-target');
+                const displayType = this.getAttribute('data-type');
+                document.getElementById(targetId).style.display = displayType;
+
+                homeView.style.display = 'none';
+                detailView.style.display = 'block';
+                
+                if(displayType === 'grid') customCursor.style.display = 'block';
+                else customCursor.style.display = 'none';
+            });
+        });
+
+        document.getElementById('menu-home-btn').addEventListener('click', function() {
+            if (navMenu.classList.contains('active')) toggleMenu();
+            homeView.style.display = 'block';
+            detailView.style.display = 'none';
+            customCursor.style.display = 'none';
+        });
+
+        backBtn.addEventListener('click', function() {
+            homeView.style.display = 'block';
+            detailView.style.display = 'none';
+            customCursor.style.display = 'none';
+        });
+
+        // --- 5. เมาส์วงกลม ---
+        window.addEventListener('mousemove', function(e) {
+            customCursor.style.left = e.clientX + 'px';
+            customCursor.style.top = e.clientY + 'px';
+        });
+
+        document.querySelectorAll('.grid-item').forEach(item => {
+            item.addEventListener('mouseenter', () => customCursor.classList.add('active'));
+            item.addEventListener('mouseleave', () => customCursor.classList.remove('active'));
+        });
+    </script>
+</body>
+</html>
